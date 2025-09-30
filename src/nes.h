@@ -5,12 +5,14 @@
 #include "cpu.h"
 #include "ram.h"
 #include "bus.h"
+#include "cartridge.h"
 
 class NES {
 private:
 public:
   CPU cpu;
   RAM ram;
+  Cartridge cartridge;
   Bus bus;
 public:
   NES();

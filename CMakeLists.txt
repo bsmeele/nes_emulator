@@ -8,6 +8,8 @@ add_library(nescore
   src/cpu.cpp
   src/bus.cpp
   src/ram.cpp
+  src/cartridge.cpp
+  src/nrom.cpp
 )
 
 target_include_directories(nescore PUBLIC
