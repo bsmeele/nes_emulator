@@ -19,6 +19,7 @@ private:
 public:
   CPU(Bus* bus);
   ~CPU();
+
   void reset();
   void tick();
 };

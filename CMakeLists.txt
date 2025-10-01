@@ -3,6 +3,8 @@ project(NES_emulator)
 
 set(CMAKE_CXX_STANDARD 17)
 
+option(TESTING "Build and run test" OFF)
+
 add_library(nescore
   src/nes.cpp
   src/cpu.cpp
@@ -15,10 +17,12 @@ add_library(nescore
 target_include_directories(nescore PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
+if (TESTING)
+  target_compile_definitions(nescore PUBLIC TESTING)
+endif()
+
 add_executable(${PROJECT_NAME} src/main.cpp)
 target_link_libraries(${PROJECT_NAME} PRIVATE nescore)
-
-option(TESTING "Build and run test" OFF)
 
 if (TESTING)
   Include(FetchContent)

@@ -8,9 +8,11 @@
 
 class NROM : public Mapper {
 private:
-  uint8_t* bank1;
-  uint8_t* bank2;
-  
+  uint8_t* prg_rom_bank1;
+  uint8_t* prg_rom_bank2;
+
+  uint8_t* chr_rom_bank1;
+
 public:
   NROM(const std::vector<uint8_t>& rom);
   ~NROM();

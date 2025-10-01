@@ -1,0 +1,6 @@
+#ifndef MAPPER_IMPLEMENTATIONS_H
+#define MAPPER_IMPLEMENTATIONS_H
+
+#include "nrom.h"
+
+#endif  // MAPPER_IMPLEMENTATIONS_H

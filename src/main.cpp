@@ -1,37 +1,48 @@
 #include "nes.h"
 
 #include <iostream>
+#include <fstream>
+#include <vector>
+#include <iomanip>
 
 int main() {
   NES nes = NES();
-  nes.bus.write(0x0001, 1);
-  nes.bus.write(0x0802, 2);
-  nes.bus.write(0x1003, 3);
-  nes.bus.write(0x1804, 5);
 
-  std::cout << "Reading from $0001 $0002 $0003 $0004" << std::endl;
-  std::cout << +nes.bus.read(0x0001)
-    << " " << +nes.bus.read(0x0002)
-    << " " << +nes.bus.read(0x0003)
-    << " " << +nes.bus.read(0x0004) << std::endl << std::endl;
+  std::string filename = "../roms/Mario Bros. (World).nes";
+  std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
-  std::cout << "Reading from $0801 $0802 $0803 $0804" << std::endl;
-  std::cout << +nes.bus.read(0x0801)
-    << " " << +nes.bus.read(0x0802)
-    << " " << +nes.bus.read(0x0803)
-    << " " << +nes.bus.read(0x0804) << std::endl << std::endl;
+  if (!file) {
+    throw std::runtime_error("Could not open file: " + filename);
+  }
+  
+  std::streamsize filesize = file.tellg();
+  file.seekg(0, std::ios::beg);
 
-  std::cout << "Reading from $1001 $1002 $1003 $1005" << std::endl;
-  std::cout << +nes.bus.read(0x1001)
-    << " " << +nes.bus.read(0x1002)
-    << " " << +nes.bus.read(0x1003)
-    << " " << +nes.bus.read(0x1004) << std::endl << std::endl;
+  std::vector<uint8_t> rom(filesize);
 
-  std::cout << "Reading from $1801 $1802 $1803 $1805" << std::endl;
-  std::cout << +nes.bus.read(0x1801)
-    << " " << +nes.bus.read(0x1802)
-    << " " << +nes.bus.read(0x1803)
-    << " " << +nes.bus.read(0x1804) << std::endl << std::endl;
+  if (!file.read(reinterpret_cast<char*>(rom.data()), filesize)) {
+    throw std::runtime_error("Could not read file: " + filename);
+  }
+
+  nes.load_rom(rom);
+
+  std::cout << "Reading the first 4 bytes from bank1 of the cartridge" << std::endl;
+  std::cout << std::hex << std::uppercase
+    << static_cast<int>(nes.bus.read(0x8000))
+    << " " << static_cast<int>(nes.bus.read(0x8001))
+    << " " << static_cast<int>(nes.bus.read(0x8002))
+    << " " << static_cast<int>(nes.bus.read(0x8003))
+    << " " << static_cast<int>(nes.bus.read(0x8004))
+    << std::dec << std::endl;
+
+  std::cout << "Reading the first 4 bytes from bank2 of the cartridge" << std::endl;
+  std::cout << std::hex << std::uppercase
+    << static_cast<int>(nes.bus.read(0xC000))
+    << " " << static_cast<int>(nes.bus.read(0xC001))
+    << " " << static_cast<int>(nes.bus.read(0xC002))
+    << " " << static_cast<int>(nes.bus.read(0xC003))
+    << " " << static_cast<int>(nes.bus.read(0xC004))
+    << std::dec << std::endl;
 
   return 0;
 }

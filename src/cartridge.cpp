@@ -1,4 +1,9 @@
 #include "cartridge.h"
+#include "mapper_implementations.h"
+
+#include <iostream>
+#include <stdexcept>
+#include <sstream>
 
 Cartridge::Cartridge() {
   this->mapper = nullptr;
@@ -7,7 +12,22 @@ Cartridge::Cartridge() {
 Cartridge::~Cartridge() {}
 
 void Cartridge::load_rom(const std::vector<uint8_t>& rom) {
-  // this->mapper = std::make_unique<Mapper>(rom);  // TODO: replace with constructor of the actual mapper
+  if (rom[0] != 0x4E || rom[1] != 0x45 || rom[2] != 0x53 || rom[3] != 0x1A) {
+    throw std::invalid_argument("Invalid .nes format");
+  }
+
+  uint8_t mapper_num = (rom[7] & 0xF0) | ((rom[6] & 0xF0) >> 4);
+
+  switch (mapper_num) {
+    case 0:
+      this->mapper = std::make_unique<NROM>(rom);
+      break;
+    default:
+      std::ostringstream oss;
+      oss << "Mapper " << mapper_num << " not supported" << std::endl;
+      throw std::invalid_argument(oss.str());
+      break;
+  }
 }
 
 std::optional<uint8_t> Cartridge::read(uint16_t address) {

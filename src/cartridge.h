@@ -11,7 +11,7 @@
 class Cartridge : public MemoryDevice {
 private:
   std::unique_ptr<Mapper> mapper;
-  
+
 public:
   Cartridge();
   ~Cartridge();

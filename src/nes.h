@@ -1,15 +1,16 @@
 #ifndef NES_H
 #define NES_H
 
-#include <cstdint>
+#include "access_modifiers.h"
 #include "cpu.h"
 #include "ram.h"
 #include "bus.h"
 #include "cartridge.h"
 
+#include <cstdint>
+
 class NES {
-private:
-public:
+TEST_PUBLIC:
   CPU cpu;
   RAM ram;
   Cartridge cartridge;
@@ -17,6 +18,8 @@ public:
 public:
   NES();
   ~NES();
+
+  void load_rom(const std::vector<uint8_t>& rom);
 };
 
 #endif  // NES_H
