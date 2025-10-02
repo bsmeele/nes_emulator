@@ -25,13 +25,15 @@ void CPU::reset() {
 }
 
 void CPU::tick() {
-  if (this->program_counter > 0) {
-    this->program_counter -= 1;
+  if (this->lockout_counter > 0) {
+    this->lockout_counter -= 1;
     return;
   }
 
   // Fetch instruction
   uint8_t opcode = this->bus->read(this->program_counter);
+  this->program_counter += 1;
+  this->lockout_counter = 1;
 
   // Decode instruction into address mode and operation
   auto [address_mode, operation] = instruction_lookup[opcode];
