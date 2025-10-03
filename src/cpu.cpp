@@ -1,6 +1,8 @@
 #include "cpu.h"
 #include "instruction_tables.h"
 
+#include <stdexcept>
+
 CPU::CPU(Bus* bus) {
   this->bus = bus;
 
@@ -37,12 +39,16 @@ void CPU::tick() {
 
   // Decode instruction into address mode and operation
   auto [address_mode, operation] = instruction_lookup[opcode];
-
-  // Fetch necessary instruction data
+  if (address_mode == AddressMode::NotSupported) {
+    throw std::runtime_error("Selected address mode not supported");
+  }
+  if (operation == Operation::NotSupported) {
+    throw std::runtime_error("Selected operation not supported");
+  }
 
   // Resolve address mode
+  std::optional<uint16_t> address = (this->*address_mode_lookup[static_cast<uint8_t>(address_mode)])();
 
   // Resolve operation
-
-  // Set lockout counter
+  (this->*operation_lookup[static_cast<uint8_t>(operation)])(address);
 };
