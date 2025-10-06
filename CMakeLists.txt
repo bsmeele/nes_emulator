@@ -3,11 +3,15 @@ project(NES_emulator)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 option(TESTING "Build and run test" OFF)
 
 add_library(nescore
   src/nes.cpp
   src/cpu.cpp
+  src/address_modes.cpp
+  src/operations.cpp
   src/bus.cpp
   src/ram.cpp
   src/cartridge.cpp
@@ -36,7 +40,10 @@ if (TESTING)
 
   enable_testing()
 
-  add_executable(tests tests/tests.cpp)
+  add_executable(tests
+    tests/tests.cpp
+    tests/test_cpu_address_mode.cpp
+  )
   target_link_libraries(tests PRIVATE nescore Catch2::Catch2WithMain)
 
   include(Catch)

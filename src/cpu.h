@@ -1,6 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include "access_modifiers.h"
 #include "bus.h"
 
 #include <cstdint>
@@ -8,6 +9,7 @@
 
 class CPU {
 private:
+TEST_PUBLIC:
   Bus* bus;
 
   uint8_t accumulator;
