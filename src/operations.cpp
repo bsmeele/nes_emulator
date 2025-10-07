@@ -8,8 +8,8 @@ void CPU::ADC(std::optional<uint16_t> address) {  // Add with Carry
   uint16_t result = this->accumulator + operand + (this->flag & 0x01);
 
   this->flag = (this->flag & ~0x01) | ((result > 0xFF) * 0x01);  // Carry flag
-  this->flag = (this->flag & ~0x02) | ((result == 0x00) * 0x02);  // Zero flag
-  this->flag = (this->flag & ~0x40) | (((result ^ this->accumulator) & (result ^ operand) & 0x80) * 0x40);  // Overflow flag
+  this->flag = (this->flag & ~0x02) | (((result & 0x00FF) == 0x00) * 0x02);  // Zero flag
+  this->flag = (this->flag & ~0x40) | ((((result ^ this->accumulator) & (result ^ operand) & 0x80) == 0x80) * 0x40);  // Overflow flag
   this->flag = (this->flag & ~0x80) | (result & 0x80);  // Negative flag
 
   this->accumulator = result;
@@ -37,12 +37,12 @@ void CPU::ASL(std::optional<uint16_t> address) {  // Arithmetic Shift Left
     operand = this->accumulator;
   }
 
-  bool carry = operand & 0x80 == 0x80;
+  bool carry = (operand & 0x80) == 0x80;
   uint8_t result = operand << 1;
 
   this->flag = (this->flag & ~0x01) | (carry * 0x01);  // Carry flag
   this->flag = (this->flag & ~0x02) | ((result == 0x00) * 0x02);  // Zero flag
-  this->flag = (this->flag & ~0x80) | (result &  0x80);  // Negative flag
+  this->flag = (this->flag & ~0x80) | (result & 0x80);  // Negative flag
 
   if (address) {
     this->bus->write(address.value(), result);
@@ -56,12 +56,12 @@ void CPU::BCC(std::optional<uint16_t> address) {  // Branch if Carry Clear
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x01 == 0x01) {
+  if ((this->flag & 0x01) == 0x00) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -75,12 +75,12 @@ void CPU::BCS(std::optional<uint16_t> address) {  // Branch if Carry Set
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x01 != 0x01) {
+  if ((this->flag & 0x01) == 0x01) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -94,12 +94,12 @@ void CPU::BEQ(std::optional<uint16_t> address) {  // Branch if Equal
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x02 == 0x02) {
+  if ((this->flag & 0x02) == 0x02) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -113,7 +113,7 @@ void CPU::BIT(std::optional<uint16_t> address) {  // Bit Test
 
   uint8_t operand = this->bus->read(address.value());
 
-  this->flag = (this->flag & ~0x02) | ((operand & this->accumulator == 0x00) * 0x02);  // Zero flag
+  this->flag = (this->flag & ~0x02) | (((operand & this->accumulator) == 0x00) * 0x02);  // Zero flag
   this->flag = (this->flag & ~0xC0) | (operand & 0xC0);  // Overflow and netagive flag
 }
 
@@ -122,12 +122,12 @@ void CPU::BMI(std::optional<uint16_t> address) {  // Branch if Minus
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x80 == 0x80) {
+  if ((this->flag & 0x80) == 0x80) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -141,12 +141,12 @@ void CPU::BNE(std::optional<uint16_t> address) {  // Branch if Not Equal
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x02 != 0x02) {
+  if ((this->flag & 0x02) == 0x00) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -160,12 +160,12 @@ void CPU::BPL(std::optional<uint16_t> address) {  // Branch if Plus
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x80 != 0x80) {
+  if ((this->flag & 0x80) == 0x00) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -180,7 +180,7 @@ void CPU::BRK(std::optional<uint16_t> address) {  // Break (software IRQ)
   this->program_counter += 1;
 
   this->bus->write(0x0100 | this->stack_pointer, (this->program_counter & 0xFF00) >> 8);  // Push upper PC
-  this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter * 0x00FF);   // Push lower PC
+  this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter & 0x00FF);   // Push lower PC
   this->bus->write(0x0100 | (this->stack_pointer - 2), this->flag | 0x10);                // Puch status register with B flag set
   this->stack_pointer -= 3;
 
@@ -193,12 +193,12 @@ void CPU::BVC(std::optional<uint16_t> address) {  // Branch if Overflow Clear
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x40 != 0x40) {
+  if ((this->flag & 0x40) == 0x00) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -212,12 +212,12 @@ void CPU::BVS(std::optional<uint16_t> address) {  // Branch if Overflow Set
 
   uint8_t offset = this->bus->read(address.value());
 
-  if (this->flag & 0x40 == 0x40) {
+  if ((this->flag & 0x40) == 0x40) {
     this->lockout_counter += 1;
 
     uint16_t result = this->program_counter + static_cast<int8_t>(offset);
 
-    if (result & 0x0100 != this->program_counter & 0x0100) {
+    if ((result & 0xFF00) != (this->program_counter & 0xFF00)) {
       // Page boundary crossed
       this->lockout_counter += 1;
     }
@@ -229,25 +229,25 @@ void CPU::BVS(std::optional<uint16_t> address) {  // Branch if Overflow Set
 void CPU::CLC(std::optional<uint16_t> address) {  // Clear Carry
   this->lockout_counter += 1;
 
-  this->flag &= 0xFE;
+  this->flag &= ~0x01;
 }
 
 void CPU::CLD(std::optional<uint16_t> address) {  // Clear Decimal
   this->lockout_counter += 1;
 
-  this->flag &= 0xF7;
+  this->flag &= ~0x08;
 }
 
 void CPU::CLI(std::optional<uint16_t> address) {  // Clear Interrupt Disable
   this->lockout_counter += 1;
 
-  this->flag &= 0xFB;
+  this->flag &= ~0x04;
 }
 
 void CPU::CLV(std::optional<uint16_t> address) {  // Clear Overflow
   this->lockout_counter += 1;
 
-  this->flag &= 0xBF;
+  this->flag &= ~0x40;
 }
 
 void CPU::CMP(std::optional<uint16_t> address) {  // Compare A
@@ -361,7 +361,7 @@ void CPU::JSR(std::optional<uint16_t> address) {  // Jump to Subroutine
   this->lockout_counter += 3;
 
   this->bus->write(0x0100 | this->stack_pointer, (this->program_counter & 0xFF00) >> 8);  // Push upper PC
-  this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter * 0x00FF);   // Push lower PC
+  this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter & 0x00FF);   // Push lower PC
   this->stack_pointer -= 2;
 
   this->program_counter = address.value();
@@ -405,7 +405,7 @@ void CPU::LSR(std::optional<uint16_t> address) {  // Logic Shift Right
     operand = this->accumulator;
   }
 
-  bool carry = operand & 0x01 == 0x01;
+  bool carry = (operand & 0x01) == 0x01;
   uint8_t result = operand >> 1;
 
   this->flag = (this->flag & ~0x01) | (carry * 0x01);  // Carry flag
@@ -444,7 +444,7 @@ void CPU::PHA(std::optional<uint16_t> address) {  // Push A
 void CPU::PHP(std::optional<uint16_t> address) {  // Push Processor Status
   this->lockout_counter += 2;
 
-  this->bus->write(0x0100 | this->stack_pointer, this->flag | 0x10);
+  this->bus->write(0x0100 | this->stack_pointer, this->flag | 0x20);
   this->stack_pointer -= 1;
 }
 
@@ -462,7 +462,7 @@ void CPU::PLP(std::optional<uint16_t> address) {  // Pull Procesor Status
   this->lockout_counter += 3;
 
   this->stack_pointer += 1;
-  this->flag = (this->flag & ~0xCF) | (this->bus->read(0x0100 | this->stack_pointer) & 0xCF);
+  this->flag = (this->flag & ~0xCF) | (this->bus->read(0x0100 | this->stack_pointer) & ~0x20);
 }
 
 void CPU::ROL(std::optional<uint16_t> address) {  // Rotate Left
@@ -476,13 +476,13 @@ void CPU::ROL(std::optional<uint16_t> address) {  // Rotate Left
     operand = this->accumulator;
   }
 
-  bool carry = operand | 0x80 == 0x80;
+  bool carry = (operand & 0x80) == 0x80;
   uint8_t result = operand << 1;
-  result |= carry * 0x01;
+  result |= this->flag & 0x01;
 
   this->flag = (this->flag & ~0x01) | (carry * 0x01);  // Carry flag
   this->flag = (this->flag & ~0x02) | ((result == 0x00) * 0x02);  // Zero flag
-  this->flag = this->flag & ~0x80;  // Negative flag
+  this->flag = (this->flag & ~0x80) | ((result & 0x80) == 0x80) * 0x80;  // Negative flag
 
   if (address) {
     this->bus->write(address.value(), result);
@@ -502,13 +502,13 @@ void CPU::ROR(std::optional<uint16_t> address) {  // Rotate Right
     operand = this->accumulator;
   }
 
-  bool carry = operand | 0x01 == 0x01;
+  bool carry = (operand & 0x01) == 0x01;
   uint8_t result = operand >> 1;
-  result |= carry * 0x80;
+  result |= ((this->flag & 0x01) == 0x01) * 0x80;
 
   this->flag = (this->flag & ~0x01) | (carry * 0x01);  // Carry flag
   this->flag = (this->flag & ~0x02) | ((result == 0x00) * 0x02);  // Zero flag
-  this->flag = this->flag & ~0x80;  // Negative flag
+  this->flag = (this->flag & ~0x80) | ((result & 0x80) == 0x80) * 0x80;  // Negative flag
 
   if (address) {
     this->bus->write(address.value(), result);
@@ -529,8 +529,8 @@ void CPU::RTI(std::optional<uint16_t> address) {  // Return from Interrupt
 void CPU::RTS(std::optional<uint16_t> address) {  // Return from Subroutine
   this->lockout_counter += 5;
 
-  this->program_counter = this->bus->read(0x0100 | (this->stack_pointer + 2));
-  this->program_counter |= this->bus->read(0x0100 | (this->stack_pointer + 3)) << 8;
+  this->program_counter = this->bus->read(0x0100 | (this->stack_pointer + 1));
+  this->program_counter |= this->bus->read(0x0100 | (this->stack_pointer + 2)) << 8;
   this->stack_pointer += 2;
   
   this->program_counter += 1;
@@ -541,11 +541,11 @@ void CPU::SBC(std::optional<uint16_t> address) {  // Subtract with Carry
 
   uint8_t operand = this->bus->read(address.value());
 
-  int16_t result = this->accumulator - operand + (this->flag & 0x01);
+  int16_t result = this->accumulator - operand - (~this->flag & 0x01);
 
-  this->flag = (this->flag & ~0x01) | ((result < 0) * 0x01);  // Carry flag
-  this->flag = (this->flag & ~0x02) | ((result == 0) * 0x02);  // Zero flag
-  this->flag = (this->flag & ~0x40) | (((result ^ this->accumulator) & (result ^ ~operand) & 0x80) * 0x40);  // Overflow flag
+  this->flag = (this->flag & ~0x01) | (~(result < 0x00) * 0x01);  // Carry flag
+  this->flag = (this->flag & ~0x02) | (((result & 0x00FF) == 0x00) * 0x02);  // Zero flag
+  this->flag = (this->flag & ~0x40) | ((((result ^ this->accumulator) & (result ^ ~operand) & 0x80) == 0x80) * 0x40);  // Overflow flag
   this->flag = (this->flag & ~0x80) | (result & 0x80);  // Negative flag
 
   this->accumulator = result;

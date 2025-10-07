@@ -147,4 +147,3 @@ std::optional<uint16_t> CPU::addressing_zeropageY() {
   uint16_t address = low_byte;
   return address;
 }
-

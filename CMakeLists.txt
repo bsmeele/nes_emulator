@@ -43,6 +43,7 @@ if (TESTING)
   add_executable(tests
     tests/tests.cpp
     tests/test_cpu_address_mode.cpp
+    tests/test_cpu_operation.cpp
   )
   target_link_libraries(tests PRIVATE nescore Catch2::Catch2WithMain)
 
