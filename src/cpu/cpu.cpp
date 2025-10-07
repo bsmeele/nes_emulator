@@ -1,5 +1,5 @@
-#include "cpu.h"
-#include "instruction_tables.h"
+#include "cpu/cpu.h"
+#include "cpu/instruction_tables.h"
 
 #include <stdexcept>
 

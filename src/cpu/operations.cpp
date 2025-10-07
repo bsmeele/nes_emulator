@@ -1,4 +1,4 @@
-#include "cpu.h"
+#include "cpu/cpu.h"
 
 void CPU::ADC(std::optional<uint16_t> address) {  // Add with Carry
   this->lockout_counter += 1;

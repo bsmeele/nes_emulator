@@ -1,4 +1,4 @@
-#include "nrom.h"
+#include "cartridge/nrom.h"
 
 #include <iostream>
 #include <sstream>

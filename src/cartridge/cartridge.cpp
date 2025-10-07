@@ -1,5 +1,5 @@
-#include "cartridge.h"
-#include "mapper_implementations.h"
+#include "cartridge/cartridge.h"
+#include "cartridge/mapper_implementations.h"
 
 #include <iostream>
 #include <stdexcept>

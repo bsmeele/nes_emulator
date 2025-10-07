@@ -1,4 +1,4 @@
-#include "cpu.h"
+#include "cpu/cpu.h"
 
 std::optional<uint16_t> CPU::addressing_absolute() {
   this->lockout_counter += 2;

@@ -1,7 +1,7 @@
 #ifndef NROM_H
 #define NROM_H
 
-#include "mapper.h"
+#include "cartridge/mapper.h"
 
 #include <cstdint>
 #include <vector>

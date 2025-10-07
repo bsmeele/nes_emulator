@@ -9,17 +9,16 @@ option(TESTING "Build and run test" OFF)
 
 add_library(nescore
   src/nes.cpp
-  src/cpu.cpp
-  src/address_modes.cpp
-  src/operations.cpp
+  src/cpu/cpu.cpp
+  src/cpu/address_modes.cpp
+  src/cpu/operations.cpp
   src/bus.cpp
   src/ram.cpp
-  src/cartridge.cpp
-  src/nrom.cpp
+  src/cartridge/cartridge.cpp
+  src/cartridge/nrom.cpp
 )
 
-target_include_directories(nescore PUBLIC
-  ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_include_directories(nescore PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 if (TESTING)
   target_compile_definitions(nescore PUBLIC TESTING)

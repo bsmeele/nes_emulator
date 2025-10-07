@@ -1,7 +1,7 @@
 #ifndef INSTRUCTION_TABLES_H
 #define INSTRUCTION_TABLES_H
 
-#include "cpu.h"
+#include "cpu/cpu.h"
 
 #include <cstdint>
 #include <utility>

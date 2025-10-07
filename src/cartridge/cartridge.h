@@ -2,7 +2,7 @@
 #define CARTRIDGE_H
 
 #include "memory_device.h"
-#include "mapper.h"
+#include "cartridge/mapper.h"
 
 #include <cstdint>
 #include <vector>

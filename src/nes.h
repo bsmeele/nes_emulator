@@ -2,10 +2,10 @@
 #define NES_H
 
 #include "access_modifiers.h"
-#include "cpu.h"
+#include "cpu/cpu.h"
 #include "ram.h"
 #include "bus.h"
-#include "cartridge.h"
+#include "cartridge/cartridge.h"
 
 #include <cstdint>
 
