@@ -181,7 +181,7 @@ void CPU::BRK(std::optional<uint16_t> address) {  // Break (software IRQ)
 
   this->bus->write(0x0100 | this->stack_pointer, (this->program_counter & 0xFF00) >> 8);  // Push upper PC
   this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter & 0x00FF);   // Push lower PC
-  this->bus->write(0x0100 | (this->stack_pointer - 2), this->flag | 0x10);                // Puch status register with B flag set
+  this->bus->write(0x0100 | (this->stack_pointer - 2), this->flag | 0x30);                // Puch status register with B flag set
   this->stack_pointer -= 3;
 
   this->program_counter = 0xFFFE;
@@ -361,7 +361,7 @@ void CPU::JSR(std::optional<uint16_t> address) {  // Jump to Subroutine
   this->lockout_counter += 3;
 
   this->bus->write(0x0100 | this->stack_pointer, (this->program_counter & 0xFF00) >> 8);  // Push upper PC
-  this->bus->write(0x0100 | (this->stack_pointer - 1), this->program_counter & 0x00FF);   // Push lower PC
+  this->bus->write(0x0100 | (this->stack_pointer - 1), (this->program_counter - 1) & 0x00FF);   // Push lower PC
   this->stack_pointer -= 2;
 
   this->program_counter = address.value();
@@ -444,7 +444,7 @@ void CPU::PHA(std::optional<uint16_t> address) {  // Push A
 void CPU::PHP(std::optional<uint16_t> address) {  // Push Processor Status
   this->lockout_counter += 2;
 
-  this->bus->write(0x0100 | this->stack_pointer, this->flag | 0x20);
+  this->bus->write(0x0100 | this->stack_pointer, this->flag | 0x30);
   this->stack_pointer -= 1;
 }
 

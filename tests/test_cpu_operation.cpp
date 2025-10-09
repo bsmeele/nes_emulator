@@ -564,7 +564,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     REQUIRE( nes.bus.read(0x0155) == 0x34 );
     REQUIRE( nes.bus.read(0x0154) == 0x30 );
     REQUIRE( nes.cpu.program_counter == 0xFFFE );
-    REQUIRE( nes.cpu.flag == 0x24 );  // Interrupt disable flag
+    REQUIRE( nes.cpu.flag == 0x04 );  // Interrupt disable flag
     REQUIRE( nes.cpu.stack_pointer == 0x53 );
     REQUIRE( nes.cpu.lockout_counter == 6 );
   }
@@ -1091,7 +1091,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     REQUIRE( nes.cpu.program_counter == 0x4321 );
     REQUIRE( nes.cpu.stack_pointer == 0x54 );
     REQUIRE( nes.bus.read(0x0156) == 0x12 );
-    REQUIRE( nes.bus.read(0x0155) == 0x34 );
+    REQUIRE( nes.bus.read(0x0155) == 0x33 );
     REQUIRE( nes.cpu.lockout_counter == 3 );
   }
 

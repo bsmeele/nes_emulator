@@ -56,6 +56,7 @@ NROM::NROM(const std::vector<uint8_t>& rom) {  // TODO
     std::memcpy(this->prg_rom_bank2, rom.data() + offset, 0x4000);
   }
 
+  this->chr_rom_bank1 = new uint8_t[0x2000];
   if (chr_rom_size > 0) {
     size_t offset = 16 + 512 * trainer_present + 0x4000 * prg_rom_size;
     if (offset + 0x2000 > rom.size()) {

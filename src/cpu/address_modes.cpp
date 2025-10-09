@@ -111,7 +111,7 @@ std::optional<uint16_t> CPU::addressing_indirectY() {
 }
 
 std::optional<uint16_t> CPU::addressing_relative() {
-  uint8_t address = this->program_counter;
+  uint16_t address = this->program_counter;
   program_counter += 1;
   return address;
 }

@@ -43,6 +43,8 @@ if (TESTING)
     tests/tests.cpp
     tests/test_cpu_address_mode.cpp
     tests/test_cpu_operation.cpp
+    tests/test_cpu_opcodes.cpp
+    tests/test_rom_cpu.cpp
   )
   target_link_libraries(tests PRIVATE nescore Catch2::Catch2WithMain)
 
