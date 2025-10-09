@@ -12,7 +12,7 @@ TEST_CASE( "Test ROM CPU", "[CPU]" ) {
   NES nes = NES();
 
   SECTION( "Fibonacci" ) {
-    std::string filename = "../roms/fibonacci.nes";
+    std::string filename = "../test_roms/fibonacci.nes";
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
     if (!file) {
@@ -48,7 +48,7 @@ TEST_CASE( "Test ROM CPU", "[CPU]" ) {
   }
 
   SECTION( "Arithmetic" ) {
-    std::string filename = "../roms/arithmetic.nes";
+    std::string filename = "../test_roms/arithmetic.nes";
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
     if (!file) {
@@ -84,7 +84,7 @@ TEST_CASE( "Test ROM CPU", "[CPU]" ) {
   }
 
   SECTION( "Sorting" ) {
-    std::string filename = "../roms/sorting.nes";
+    std::string filename = "../test_roms/sorting.nes";
     std::ifstream file(filename, std::ios::binary | std::ios::ate);
 
     if (!file) {
@@ -103,58 +103,8 @@ TEST_CASE( "Test ROM CPU", "[CPU]" ) {
     nes.load_rom(rom);
 
     while (nes.cpu.program_counter != 0xFFFE) {
-      // if (nes.cpu.lockout_counter == 0) {
-      //   std::cout << std::hex << std::uppercase
-      //     << static_cast<int>(nes.cpu.program_counter)
-      //     << " " << static_cast<int>(nes.bus.read(nes.cpu.program_counter))
-      //     << " " << static_cast<int>(nes.bus.read(nes.cpu.program_counter + 1))
-      //     << " | " << static_cast<int>(nes.cpu.x_index)
-      //     << " " << static_cast<int>(nes.cpu.y_index)
-      //     << " " << static_cast<int>(nes.cpu.accumulator)
-      //     << " | " << static_cast<int>(nes.bus.read(0x0034))
-      //     << " " << static_cast<int>(nes.bus.read(0x0035))
-      //     << " " << static_cast<int>(nes.bus.read(0x0036))
-      //     << " " << static_cast<int>(nes.bus.read(0x0037))
-      //     << " | " << static_cast<int>(nes.bus.read(0x0020))
-      //     << " " << static_cast<int>(nes.bus.read(0x0021))
-      //     << " " << static_cast<int>(nes.bus.read(0x0022))
-      //     << " " << static_cast<int>(nes.bus.read(0x0023))
-      //     << " " << static_cast<int>(nes.bus.read(0x0024))
-      //     << " " << static_cast<int>(nes.bus.read(0x0025))
-      //     << " " << static_cast<int>(nes.bus.read(0x0026))
-      //     << " " << static_cast<int>(nes.bus.read(0x0027))
-      //     << " " << static_cast<int>(nes.bus.read(0x0028))
-      //     << " " << static_cast<int>(nes.bus.read(0x0029))
-      //     << " " << static_cast<int>(nes.bus.read(0x002A))
-      //     << " " << static_cast<int>(nes.bus.read(0x002B))
-      //     << " " << static_cast<int>(nes.bus.read(0x002C))
-      //     << " " << static_cast<int>(nes.bus.read(0x002D))
-      //     << " " << static_cast<int>(nes.bus.read(0x002E))
-      //     << " " << static_cast<int>(nes.bus.read(0x002F))
-      //     << std::dec << "\n";
-      //     // std::cin.get();
-      // }
       nes.cpu.tick();
     }
-
-    // std::cout << std::hex << std::uppercase
-    //   <<        static_cast<int>(nes.bus.read(0x0020))
-    //   << " " << static_cast<int>(nes.bus.read(0x0021))
-    //   << " " << static_cast<int>(nes.bus.read(0x0022))
-    //   << " " << static_cast<int>(nes.bus.read(0x0023))
-    //   << " " << static_cast<int>(nes.bus.read(0x0024))
-    //   << " " << static_cast<int>(nes.bus.read(0x0025))
-    //   << " " << static_cast<int>(nes.bus.read(0x0026))
-    //   << " " << static_cast<int>(nes.bus.read(0x0027))
-    //   << " " << static_cast<int>(nes.bus.read(0x0028))
-    //   << " " << static_cast<int>(nes.bus.read(0x0029))
-    //   << " " << static_cast<int>(nes.bus.read(0x002A))
-    //   << " " << static_cast<int>(nes.bus.read(0x002B))
-    //   << " " << static_cast<int>(nes.bus.read(0x002C))
-    //   << " " << static_cast<int>(nes.bus.read(0x002D))
-    //   << " " << static_cast<int>(nes.bus.read(0x002E))
-    //   << " " << static_cast<int>(nes.bus.read(0x002F))
-    //   << std::dec << "\n";
     
     // Bubble sort
     REQUIRE( nes.bus.read(0x0000) == 0x02 );
