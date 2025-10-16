@@ -1,0 +1,18 @@
+START:
+  LDA #0
+	STA $00
+	LDA #1
+	STA $01
+	LDX #1
+LOOP:
+	LDA $00,X
+	INX
+	CLC
+	ADC $00,X
+	BCS END
+	STA $01,X
+	JMP LOOP
+END:
+	LDA #0
+	STA $01,X
+	BRK
