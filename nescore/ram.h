@@ -1,7 +1,7 @@
 #ifndef RAM_H
 #define RAM_H
 
-#include "access_modifiers.h"
+#include "shared/access_modifiers.h"
 #include "memory_device.h"
 
 #include <cstdint>

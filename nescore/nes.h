@@ -1,7 +1,7 @@
 #ifndef NES_H
 #define NES_H
 
-#include "access_modifiers.h"
+#include "shared/access_modifiers.h"
 #include "cpu/cpu.h"
 #include "ram.h"
 #include "bus.h"

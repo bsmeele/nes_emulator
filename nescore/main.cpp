@@ -26,6 +26,7 @@ int main() {
 
   nes.load_rom(rom);
 
+#ifdef TESTING
   std::cout << "Reading the first 4 bytes from bank1 of the cartridge" << std::endl;
   std::cout << std::hex << std::uppercase
     << static_cast<int>(nes.bus.read(0x8000))
@@ -43,6 +44,7 @@ int main() {
     << " " << static_cast<int>(nes.bus.read(0xC003))
     << " " << static_cast<int>(nes.bus.read(0xC004))
     << std::dec << std::endl;
+#endif
 
   return 0;
 }

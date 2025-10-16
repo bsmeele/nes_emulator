@@ -1,7 +1,7 @@
 #ifndef CPU_H
 #define CPU_H
 
-#include "access_modifiers.h"
+#include "shared/access_modifiers.h"
 #include "bus.h"
 
 #include <cstdint>

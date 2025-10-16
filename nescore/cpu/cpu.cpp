@@ -38,10 +38,10 @@ void CPU::tick() {
 
   // Decode instruction into address mode and operation
   auto [address_mode, operation] = instruction_lookup[opcode];
-  if (address_mode == AddressMode::NotSupported) {
+  if (!AddressModeUtil::is_address_mode(address_mode)) {
     throw std::runtime_error("Selected address mode not supported");
   }
-  if (operation == Operation::NotSupported) {
+  if (!OperationUtil::is_operation(operation)) {
     throw std::runtime_error("Selected operation not supported");
   }
 
