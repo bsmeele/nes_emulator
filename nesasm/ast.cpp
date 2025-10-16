@@ -15,6 +15,11 @@ std::vector<std::string> tokenize_line(std::string s) {
     s = s.substr(0, commend_begin);
   }
 
+  commend_begin = s.find("//");
+  if (commend_begin != std::string::npos) {
+    s = s.substr(0, commend_begin);
+  }
+
   auto it = s.begin();
   while (it != s.end()) {
     auto word_begin = std::find_if(it, s.end(), [](unsigned char ch) {
@@ -84,87 +89,138 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
 std::variant<uint16_t, std::string> parse_operand(std::string operand_str) {
   std::variant<uint16_t, std::string> operand;
 
+  int base;
+
   if (operand_str.empty()) {
-    operand = "";
-      // std::ostringstream e;
-      // e << "Invalid empty operand\n"; 
-      // throw std::runtime_error(e.str());
-
-  } else if (std::isdigit(operand_str.front())) {
-    try {
-      size_t pos;
-      operand = static_cast<uint16_t>(std::stoul(operand_str, &pos));
-
-      if (pos != operand_str.length()) {
-        std::ostringstream e;
-        e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
-        throw std::runtime_error(e.str());
-      }
-    } catch (...) {
-      std::ostringstream e;
-      e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
-      throw std::runtime_error(e.str());
-    }
-
+    return "";
   } else if (operand_str.front() == '$') {
-    try {
-      size_t pos;
-      operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 16));
-
-      if (pos != operand_str.length() - 1) {
-        std::ostringstream e;
-        e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
-        throw std::runtime_error(e.str());
-      }
-    } catch (...) {
-      std::ostringstream e;
-      e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
-      throw std::runtime_error(e.str());
-    }
-
-  } else if (operand_str.front() == '@') {
-    try {
-      size_t pos;
-      operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 8));
-
-      if (pos != operand_str.length() - 1) {
-        std::ostringstream e;
-        e << "Invalid octal numerical operand: " << operand_str << '\n'; 
-        throw std::runtime_error(e.str());
-      }
-    } catch (...) {
-      std::ostringstream e;
-      e << "Invalid octal numerical operand: " << operand_str << '\n'; 
-      throw std::runtime_error(e.str());
-    }
-
-  } else if (operand_str.front() == '$') {
-    try {
-      size_t pos;
-      operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 2));
-
-      if (pos != operand_str.length() - 1) {
-        std::ostringstream e;
-        e << "Invalid binary numerical operand: " << operand_str << '\n'; 
-        throw std::runtime_error(e.str());
-      }
-    } catch (...) {
-      std::ostringstream e;
-      e << "Invalid binary numerical operand: " << operand_str << '\n'; 
-      throw std::runtime_error(e.str());
-    }
-
+    base = 16;
+    operand_str = operand_str.substr(1);
+  } else if (operand_str.length() > 1 && (operand_str.substr(0, 2) == "0x" || operand_str.substr(0, 2) == "0X")) {
+    base = 16;
+    operand_str = operand_str.substr(2);
+  } else if (operand_str.front() == '%') {
+    base = 2;
+    operand_str = operand_str.substr(1);
+  } else if (operand_str.length() > 1 && (operand_str.substr(0, 2) == "0b" || operand_str.substr(0, 2) == "0B")) {
+    base = 2;
+    operand_str = operand_str.substr(2);
+  } else if (operand_str.length() > 1 && operand_str.front() == '0') {
+    base = 8;
+    operand_str = operand_str.substr(1);
+  } else if(std::isdigit(operand_str.front())) {
+    base = 10;
   } else {
     static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_]*$)");
     if (!std::regex_match(operand_str, symbol_regex)) {
-        std::ostringstream e;
-        e << "Invalid symbol operand: " << operand_str << '\n'; 
-        throw std::runtime_error(e.str());
+        std::ostringstream msg;
+        msg << "Invalid symbol operand: " << operand_str << '\n'; 
+        throw std::runtime_error(msg.str());
     }
-    operand = operand_str;
+    return operand_str;
+  }
+
+  try {
+    size_t pos;
+    operand = static_cast<uint16_t>(std::stoul(operand_str, &pos, base));
+
+    if (pos != operand_str.length()) {
+      std::ostringstream msg;
+      msg << "Invalid numerical operand: " << operand_str << " base " << base << '\n'; 
+      throw std::runtime_error(msg.str());
+    }
+  } catch (...) {
+    std::ostringstream msg;
+    msg << "Invalid numerical operand: " << operand_str << " base " << base << '\n'; 
+    throw std::runtime_error(msg.str());
   }
 
   return operand;
+
+  // if (operand_str.empty()) {
+  //   operand = "";
+
+  // } else if (std::isdigit(operand_str.front())) {
+  //   try {
+  //     size_t pos;
+  //     operand = static_cast<uint16_t>(std::stoul(operand_str, &pos));
+
+  //     if (pos != operand_str.length()) {
+  //       std::ostringstream e;
+  //       e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
+  //       throw std::runtime_error(e.str());
+  //     }
+  //   } catch (...) {
+  //     std::ostringstream e;
+  //     e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
+  //     throw std::runtime_error(e.str());
+  //   }
+
+  // } else if (operand_str.front() == '$' || (operand_str.length() > 1 && operand_str.substr(0, 2) == "0x")) {
+  //   if (operand_str.front() == '$') {
+  //     operand_str = operand_str.substr(1);
+  //   } else {
+  //     operand_str = operand_str.substr(2);
+  //   }
+
+  //   try {
+  //     size_t pos;
+  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 16));
+
+  //     if (pos != operand_str.length() - 1) {
+  //       std::ostringstream e;
+  //       e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
+  //       throw std::runtime_error(e.str());
+  //     }
+  //   } catch (...) {
+  //     std::ostringstream e;
+  //     e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
+  //     throw std::runtime_error(e.str());
+  //   }
+
+  // } else if (operand_str.front() == '@') {
+  //   try {
+  //     size_t pos;
+  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 8));
+
+  //     if (pos != operand_str.length() - 1) {
+  //       std::ostringstream e;
+  //       e << "Invalid octal numerical operand: " << operand_str << '\n'; 
+  //       throw std::runtime_error(e.str());
+  //     }
+  //   } catch (...) {
+  //     std::ostringstream e;
+  //     e << "Invalid octal numerical operand: " << operand_str << '\n'; 
+  //     throw std::runtime_error(e.str());
+  //   }
+
+  // } else if (operand_str.front() == '$') {
+  //   try {
+  //     size_t pos;
+  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 2));
+
+  //     if (pos != operand_str.length() - 1) {
+  //       std::ostringstream e;
+  //       e << "Invalid binary numerical operand: " << operand_str << '\n'; 
+  //       throw std::runtime_error(e.str());
+  //     }
+  //   } catch (...) {
+  //     std::ostringstream e;
+  //     e << "Invalid binary numerical operand: " << operand_str << '\n'; 
+  //     throw std::runtime_error(e.str());
+  //   }
+
+  // } else {
+  //   static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_]*$)");
+  //   if (!std::regex_match(operand_str, symbol_regex)) {
+  //       std::ostringstream e;
+  //       e << "Invalid symbol operand: " << operand_str << '\n'; 
+  //       throw std::runtime_error(e.str());
+  //   }
+  //   operand = operand_str;
+  // }
+
+  // return operand;
 }
 
 Instruction parse_instruction(std::vector<std::string> line) {
@@ -175,13 +231,6 @@ Instruction parse_instruction(std::vector<std::string> line) {
     msg << "Invalid instruction: " << line[0] << '\n'; 
     throw std::runtime_error(msg.str());
   }
-  // try {
-  //   operation = operation_parse.at(line[0]);
-  // } catch (std::out_of_range e) {
-  //   std::ostringstream msg;
-  //   msg << "Invalid instruction: " << line[0] << '\n'; 
-  //   throw std::runtime_error(msg.str());
-  // }
 
   // Parse addressing mode
   AddressMode addr_mode;
@@ -209,6 +258,7 @@ AST::AST(std::stringstream& asm_src) {
 
     // Split by space and remove comments
     std::vector<std::string> split_line = tokenize_line(line);
+    if (split_line.empty()) { continue; }
 
     // Resolve each line type
     if (split_line[0].front() == '.') {  // Directive
@@ -216,7 +266,7 @@ AST::AST(std::stringstream& asm_src) {
 
     } else if (split_line[0].back() == ':') {  // Label
       split_line[0].pop_back();
-      this->symbol_map.insert({split_line[0], instr_num});
+      this->label_map.insert({split_line[0], instr_num});
 
     } else {  // Instruction
       Instruction instr;
@@ -262,7 +312,7 @@ void AST::print() {
   }
 
   std::cout << "\nLabels:\n";
-  for (auto [k, v] : this->symbol_map) {
+  for (auto [k, v] : this->label_map) {
     std::cout << k << ": " << v << '\n';
   }
 }

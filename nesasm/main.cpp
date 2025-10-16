@@ -1,11 +1,12 @@
-#include "ast.h"
+#include "assembler.h"
 
 #include <fstream>
 #include <regex>
 #include <string>
 
 int main() {
-  std::string filename = "../rom_asm/fibonacci.asm";
+  // std::string filename = "../rom_asm/fibonacci.asm";
+  std::string filename = "../rom_asm/arithmetic.asm";
   std::ifstream file(filename);
   if (!file) {
     throw std::runtime_error("Failed to open file: " + filename);
@@ -14,9 +15,12 @@ int main() {
   std::stringstream buffer;
   buffer << file.rdbuf();
 
-  AST ast = AST(buffer);
+  Assembler assembler = Assembler();
+  assembler.build_ast(buffer);
 
-  ast.print();
+#ifdef TESTING
+  assembler.ast.print();
+#endif
 
   // AST:
   //   List of blocks

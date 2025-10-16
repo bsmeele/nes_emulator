@@ -23,16 +23,15 @@ struct CodeBlock {
   std::vector<Instruction> instr_list;
 };
 
-class AST {
-private:
-TEST_PUBLIC:
+struct AST {
   // std::vector<CodeBlock> block_list;
   std::vector<Instruction> instr_list;
-  std::unordered_map<std::string, uint16_t> symbol_map;
+  std::unordered_map<std::string, uint16_t> label_map;
+  std::unordered_map<std::string, uint16_t> variable_map;
   std::unordered_set<std::string> unresolved_symbols;
-public:
-  AST(std::stringstream& asm_src);
 
+  AST() = default;
+  AST(std::stringstream& asm_src);
   void print();
 };
 

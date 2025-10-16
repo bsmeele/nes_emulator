@@ -16,8 +16,11 @@ if (TESTING)
     test_cpu_operation.cpp
     test_cpu_opcodes.cpp
     test_rom_cpu.cpp
+    test_asm_allocator.cpp
   )
-  target_link_libraries(tests PRIVATE nescore Catch2::Catch2WithMain)
+  target_link_libraries(tests PRIVATE nescore)
+  target_link_libraries(tests PRIVATE asmcore)
+  target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 
   include(Catch)
   catch_discover_tests(tests)
