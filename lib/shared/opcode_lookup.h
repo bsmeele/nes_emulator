@@ -115,8 +115,8 @@ const std::unordered_map<std::pair<AddressMode, Operation>, uint8_t, KeyHash> op
   {{AddressMode::Absolute, Operation::STX}, 0x8E},
 
   // 0x9-
-  {{AddressMode::Relative, Operation::BCC}, 0x91},
-  {{AddressMode::IndirectY, Operation::STA}, 0x92},
+  {{AddressMode::Relative, Operation::BCC}, 0x90},
+  {{AddressMode::IndirectY, Operation::STA}, 0x91},
   {{AddressMode::ZeroPageX, Operation::STY}, 0x94},
   {{AddressMode::ZeroPageX, Operation::STA}, 0x95},
   {{AddressMode::ZeroPageY, Operation::STX}, 0x96},

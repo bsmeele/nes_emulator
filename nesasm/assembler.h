@@ -11,6 +11,7 @@ private:
 TEST_PUBLIC:
   AST ast;
   Allocator allocator;
+
 public:
   Assembler();
 

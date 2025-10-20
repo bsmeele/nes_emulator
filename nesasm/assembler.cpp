@@ -34,6 +34,8 @@ void Assembler::resolve_directives() {
             + " for .reserve directive";
           throw std::runtime_error(msg);
         }
+
+        break;
       }
       default:
         std::string msg = "Invalid directive: " + DirectiveUtil::to_string(dir.directive) + " at line " + std::to_string(dir.line);
@@ -46,10 +48,17 @@ void Assembler::resolve_directives() {
 
 void Assembler::allocate_variables() {
   for (auto sym : this->ast.unresolved_symbols) {
+
     if (this->ast.label_map.count(sym)) {
       // Symbol is an existing label
       continue;
     }
+
+    if (this->ast.variable_map.count(sym)) {
+      // Symbol is already allocated
+      continue;
+    }
+    std::cout << sym << "\n";
 
     std::optional<uint16_t> loc = this->allocator.reserve_block(1);
     if (!loc.has_value()) {
@@ -66,11 +75,14 @@ void Assembler::allocate_variables() {
 
 void Assembler::resolve_variable_operands() {
   for (auto& instr : this->ast.instr_list) {
-    std::string* s = std::get_if<std::string>(&instr.operand);
-    if (!s) { continue; }  // The operand is a number
-    if (this->ast.variable_map.count(*s) == 0) { continue; }  // The operand is not a variable
+    if (!instr.operand.has_value() || std::holds_alternative<uint16_t>(instr.operand.value())) {
+      continue;  // Operand is a number or no operand is present
+    }
 
-    instr.operand = this->ast.variable_map[*s];
+    std::string s = std::get<std::string>(*instr.operand);
+    if (this->ast.variable_map.count(s) == 0) { continue; }  // The operand is not a variable
+
+    instr.operand = this->ast.variable_map[s];
   }
 }
 
@@ -84,8 +96,9 @@ void Assembler::resolve_ambiguity() {
         } else if (OperationUtil::is_jump(instr.operation)) {
           instr.address_mode = AddressMode::Absolute;
 
-        } else if (uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
-          if (*op > 0xFF) {
+        } else if (instr.operand.has_value() && std::holds_alternative<uint16_t>(instr.operand.value())) {
+          uint16_t op = std::get<uint16_t>(*instr.operand);
+          if (op > 0xFF) {
             instr.address_mode = AddressMode::Absolute;
           } else {
             instr.address_mode = AddressMode::ZeroPage;
@@ -98,12 +111,13 @@ void Assembler::resolve_ambiguity() {
         break;
 
       case AddressMode::AmbiguousZeropageXOrAbsoluteX:
-        if (uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
-            if (*op > 0xFF) {
-              instr.address_mode = AddressMode::AbsoluteX;
-            } else {
-              instr.address_mode = AddressMode::ZeroPageX;
-            }
+        if (instr.operand.has_value() && std::holds_alternative<uint16_t>(instr.operand.value())) {
+          uint16_t op = std::get<uint16_t>(*instr.operand);
+          if (op > 0xFF) {
+            instr.address_mode = AddressMode::AbsoluteX;
+          } else {
+            instr.address_mode = AddressMode::ZeroPageX;
+          }
           } else {
             std::string msg = "Could not resolve " + AddressModeUtil::to_string(instr.address_mode) + " at line " + std::to_string(instr.line);
             throw std::runtime_error(msg);
@@ -111,8 +125,9 @@ void Assembler::resolve_ambiguity() {
           break;
 
         case AddressMode::AmbiguousZeropageYOrAbsoluteY:
-          if (uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
-            if (*op > 0xFF) {
+          if (instr.operand.has_value() && std::holds_alternative<uint16_t>(instr.operand.value())) {
+            uint16_t op = std::get<uint16_t>(*instr.operand);
+            if (op > 0xFF) {
               instr.address_mode = AddressMode::AbsoluteY;
             } else {
               instr.address_mode = AddressMode::ZeroPageY;
@@ -151,13 +166,16 @@ void Assembler::resolve_labels() {
   for (int i = 0; i < this->ast.instr_list.size(); i++) {
     auto& instr = this->ast.instr_list[i];
 
-    std::string* s = std::get_if<std::string>(&instr.operand);
-    if (!s) { continue; }  // The operand is a number
-    if (this->ast.label_map.count(*s) == 0) { continue; }  // The operand is not a label
+    if (!instr.operand.has_value() || std::holds_alternative<uint16_t>(instr.operand.value())) {
+      continue;  // Operand is a number or is empty
+    }
+
+    std::string s = std::get<std::string>(*instr.operand);
+    if (this->ast.label_map.count(s) == 0) { continue; }  // The operand is not a label
     
     // The label map points to the next instruction after that label
     // The instruction knows where it is located in memory, thus what the jump location should be
-    std::optional<uint16_t> addr = this->ast.instr_list[this->ast.label_map[*s]].location;
+    std::optional<uint16_t> addr = this->ast.instr_list[this->ast.label_map[s]].location;
     if(!addr.has_value()) {
       std::string msg = "Attempted to locate unplaced instruction";
       throw std::runtime_error(msg);
@@ -212,8 +230,11 @@ std::vector<uint8_t> Assembler::generate_machine_code() {
       throw std::runtime_error(msg);
     }
 
+    if (!instr.operand.has_value()) { continue; }
+
     // Operand
-    if (const uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
+    if (std::holds_alternative<uint16_t>(instr.operand.value())) {
+      uint16_t op = std::get<uint16_t>(*instr.operand);
       std::optional<size_t> size = AddressModeUtil::get_size(instr.address_mode);
       if (!size.has_value()) {
         std::string msg = "Could not get size for instruction "
@@ -223,16 +244,14 @@ std::vector<uint8_t> Assembler::generate_machine_code() {
         throw std::runtime_error(msg);
       }
 
-      uint16_t value = *op;
-
       while (size.value() > 0) {
-        machine_code.push_back(static_cast<uint8_t>(value & 0xFF));
-        value = value >> 8;
+        machine_code.push_back(static_cast<uint8_t>(op & 0xFF));
+        op = op >> 8;
         size = size.value() - 1;
       }
     } else {
       std::string msg = "Could not generate machine code for operator "
-        + std::get<std::string>(instr.operand)
+        + std::get<std::string>(instr.operand.value())
         + " at line " + std::to_string(instr.line);
         throw std::runtime_error(msg);
     }

@@ -53,17 +53,21 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
     operand_str = addr_mode_str.substr(1);
 
   } else if (addr_mode_str.front() == '(') {  // Indirect variant
-    if (addr_mode_str.length() >= 4 && addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",X)") == 0) {  // Indirect X
+    if (addr_mode_str.length() >= 4 &&
+      (addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",X)") == 0
+      || addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",x)"))) {  // Indirect X
       addr_mode = AddressMode::IndirectX;
-      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 3);
+      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 4);
 
-    } else if (addr_mode_str.size() >= 4 && addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),Y") == 0) {  // Indirect Y
+    } else if (addr_mode_str.size() >= 4 &&
+        (addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),Y") == 0
+        || addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),y"))) {  // Indirect Y
       addr_mode = AddressMode::IndirectY;
-      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 3);
+      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 4);
 
     } else if (addr_mode_str.back() == ')') {  // Indirect
       addr_mode = AddressMode::Indirect;
-      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 1);
+      operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 2);
 
     } else {  // No match
       std::ostringstream e;
@@ -71,11 +75,15 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
       throw std::runtime_error(e.str());
     }
 
-  } else if (addr_mode_str.length() >= 2 && addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",X") == 0) {  // AbsoluteX or zeropageX
+  } else if (addr_mode_str.length() >= 2 &&
+      (addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",X") == 0
+      || addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",x") == 0)) {  // AbsoluteX or zeropageX
     addr_mode = AddressMode::AmbiguousZeropageXOrAbsoluteX;
     operand_str = addr_mode_str.substr(0, addr_mode_str.length() - 2);
 
-  } else if (addr_mode_str.length() >= 2 && addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",Y") == 0) {  // AbsoluteY or zeropageY
+  } else if (addr_mode_str.length() >= 2 &&
+      (addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",Y") == 0
+      || addr_mode_str.compare(addr_mode_str.length() - 2, 2, ",y") == 0)) {  // AbsoluteY or zeropageY
     addr_mode = AddressMode::AmbiguousZeropageYOrAbsoluteY;
     operand_str = addr_mode_str.substr(0, addr_mode_str.length() - 2);
 
@@ -89,6 +97,7 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
 
 Instruction parse_instruction(std::vector<std::string> line) {
   // Parse operation
+  std::transform(line[0].begin(), line[0].end(), line[0].begin(), ::toupper);
   Operation operation = OperationUtil::from_string(line[0]);
   if (operation == Operation::NotSupported) {
     std::ostringstream msg;
@@ -100,19 +109,24 @@ Instruction parse_instruction(std::vector<std::string> line) {
   AddressMode addr_mode;
   std::string operand_str;
   if (line.size() > 1) {
+    // std::transform(line[1].begin(), line[1].end(), line[1].begin(), ::toupper);
     std::tie(addr_mode, operand_str) = parse_address_mode(line[1]);
   } else {
     addr_mode = AddressMode::Implied;
   }
 
   // Parse operand
-  std::variant<uint16_t, std::string> operand = Utils::parse_operand(operand_str);
+  std::optional<std::variant<uint16_t, std::string>> operand;
+  if (!operand_str.empty()) {
+    operand = Utils::parse_operand(operand_str);
+  }
 
   return Instruction{addr_mode, operation, operand};
 }
 
 AST::AST(std::stringstream& asm_src) {
-  // std::string curr_block = "global";
+  // CodeBlock block;
+  // block.name = "global";
   std::string line;
   int line_num = 0;
   size_t instr_num = 0;
@@ -141,9 +155,19 @@ AST::AST(std::stringstream& asm_src) {
         throw std::runtime_error(msg);
       }
 
-    } else if (split_line[0].back() == ':') {  // Label
-      split_line[0].pop_back();
-      this->label_map.insert({split_line[0], instr_num});
+    } else if (split_line[0].length() > 1 && split_line[0].back() == ':') {  // Label
+      std::variant<uint16_t, std::string> label = Utils::parse_operand(split_line[0].substr(0, split_line[0].length()-1));
+
+      if (const std::string* l = std::get_if<std::string>(&label)) {
+        // this->label_map.insert({block.name + *l, instr_num});
+        this->label_map.insert({*l, instr_num});
+
+      } else {
+        std::string msg = "Invalid label: "
+          + std::to_string(std::get<uint16_t>(label))
+          + " at line " + std::to_string(line_num);
+        throw std::runtime_error(msg);
+      }
 
     } else {  // Instruction
       Instruction instr;
@@ -157,14 +181,17 @@ AST::AST(std::stringstream& asm_src) {
         throw std::runtime_error(msg);
       }
 
-      if (const std::string* op = std::get_if<std::string>(&instr.operand)) {
-        this->unresolved_symbols.insert(*op);
+      if (instr.operand.has_value() && std::holds_alternative<std::string>(instr.operand.value())) {
+        this->unresolved_symbols.insert(std::get<std::string>(instr.operand.value()));
       }
 
+      // block.instr_list.push_back(instr);
       this->instr_list.push_back(instr);
       instr_num += 1;
     }
   }
+
+  // this->block_list.push_back(block);
 }
 
 void AST::print() {
@@ -182,11 +209,13 @@ void AST::print() {
       << ": " << OperationUtil::to_string(instr.operation)
       << " " << AddressModeUtil::to_string(instr.address_mode);
 
-      if (const std::string* op = std::get_if<std::string>(&instr.operand)) {
-        std::cout << ' ' << *op;
-      } else if (const std::uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
-        std::cout << " " << std::uppercase << std::hex << static_cast<int>(*op) << std::dec;
-        std::cout.unsetf(std::ios_base::uppercase);
+      if (instr.operand.has_value()) {
+        if (const std::string* op = std::get_if<std::string>(&instr.operand.value())) {
+          std::cout << ' ' << *op;
+        } else if (const std::uint16_t* op = std::get_if<uint16_t>(&instr.operand.value())) {
+          std::cout << " " << std::uppercase << std::hex << static_cast<int>(*op) << std::dec;
+          std::cout.unsetf(std::ios_base::uppercase);
+        }
       }
 
       std::cout << '\n';

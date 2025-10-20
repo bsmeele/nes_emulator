@@ -19,7 +19,7 @@
 struct Instruction {
   AddressMode address_mode;
   Operation operation;
-  std::variant<uint16_t, std::string> operand;
+  std::optional<std::variant<uint16_t, std::string>> operand;
   std::optional<uint16_t> location;
   size_t line;
 };

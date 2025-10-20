@@ -1,7 +1,7 @@
 .reserve $00 $0F  // Bubble sort array
 .reserve $10 $1F  // Insertion sort array
 .reserve $20 $2F  // Quicksort array
-.reserve $0300 $0302  // Array pointer and length
+.reserve $30 $32  // Array pointer and length
 
 START:
   LDX #0x00
@@ -111,28 +111,27 @@ START:
 
   BRK
 
-.block BUBBLESORT
-START:
+BUBBLESORT.START:
   // 0x0030-0x0031 is the pointer to the list
   // n is written to 0x0032 by caller
   LDA #0xFF
   STA 0x33
-OUTER_LOOP:
+BUBBLESORT.OUTER_LOOP:
   LDA #0x00
   CMP 0x33
-  BEQ END_OUTER
+  BEQ BUBBLESORT.END_OUTER
   STA 0x33
   LDY #0x01
-INNER_LOOP:
+BUBBLESORT.INNER_LOOP:
   CPY 0x32
-  BCS END_INNER
+  BCS BUBBLESORT.END_INNER
   DEY
   LDA (0x30),Y
   INY
   CMP (0x30),Y
-  BCC END_IF
-  BEQ END_IF
-IF:
+  BCC BUBBLESORT.END_IF
+  BEQ BUBBLESORT.END_IF
+BUBBLESORT.IF:
   TAX
   LDA (0x30),Y
   DEY
@@ -141,120 +140,117 @@ IF:
   TXA
   STA (0x30),Y
   INC 0x33
-END_IF:
+BUBBLESORT.END_IF:
   INY
   SEC
-  BCS INNER_LOOP
-END_INNER:
+  BCS BUBBLESORT.INNER_LOOP
+BUBBLESORT.END_INNER:
   DEC 0x0032
   SEC
-  BCS OUTER_LOOP
-END_OUTER:
+  BCS BUBBLESORT.OUTER_LOOP
+BUBBLESORT.END_OUTER:
   RTS
 
-.block INSERTIONSORT entry=START
-START:
+INSERTIONSORT.START:
   // 0x0030-0x0031 is the pointer to the list
   // n is written to 0x0032 by caller
   LDY #0x01
-OUTER_LOOP:
+INSERTIONSORT.OUTER_LOOP:
   CPY 0x32
-  BCS END_OUTER
+  BCS INSERTIONSORT.END_OUTER
   LDA (0x30),Y
   STA 0x33
   TYA
   TAX
-INNER_LOOP:
+INSERTIONSORT.INNER_LOOP:
   CPY #0x00
-  BCC END_INNER_1
-  BEQ END_INNER_1
+  BCC INSERTIONSORT.END_INNER_1
+  BEQ INSERTIONSORT.END_INNER_1
   DEY
   LDA (0x30),Y
   CMP 0x33
-  BCC END_INNER
-  BEQ END_INNER
+  BCC INSERTIONSORT.END_INNER_0
+  BEQ INSERTIONSORT.END_INNER_0
   INY
   STA (0x30),Y
   DEY
   SEC
-  BCS INNER_LOOP
-END_INNER_0:
+  BCS INSERTIONSORT.INNER_LOOP
+INSERTIONSORT.END_INNER_0:
   INY
-END_INNER_1:
+INSERTIONSORT.END_INNER_1:
   LDA 0x33
   STA (0x30),Y
   TXA
   TAY
   INY
   SEC
-  BCS OUTER_LOOP
-END_OUTER:
+  BCS INSERTIONSORT.OUTER_LOOP
+INSERTIONSORT.END_OUTER:
   RTS
 
-.block QUICKSORT entry=QUICKSORT_SETUP
 // 0x0030-0x0031 is the pointer to the list
 // The length of the list is written to 0x0032 by the caller
-QUICKSORT_SETUP:
+QUICKSORT.SETUP:
   LDX 0x32
   DEX
   LDY $0x00
-QUICKSORT_START:
+QUICKSORT.START:
   CPY #0x00
-  BCC END_QUICKSORT
+  BCC QUICKSORT.END
   CPX #0x00
-  BCC END_QUICKSORT
+  BCC QUICKSORT.END
   STX tmp_hi
   CPY tmp_hi
-  BCS END_QUICKSORT
+  BCS QUICKSORT.END
   TXA
   PHA
   TYA
   PHA
-  JSR START_PIVOT  // returne value is passed through accumulator
+  JSR PIVOT.START  // returne value is passed through accumulator
   TAX
   PLA
   TAY
   TXA
   PHA
-  JSR QUICKSORT_START  // returne value is passed through accumulator
+  JSR QUICKSORT.START  // returne value is passed through accumulator
   PLA
   TAY
   INY
   PLA
   TAX
-  JSR QUICKSORT_START
-END_QUICKSORT:
+  JSR QUICKSORT.START
+QUICKSORT.END:
   RTS
-  
-.block PIVOT entry=START_PIVOT
-START_PIVOT:
+
+PIVOT.START:
   // y = lo, x = hi
   LDA (0x30),Y  // Acc = pivot
   DEY  // y = i
   INX  // x = j
-LOOP:
-I_LOOP:
+PIVOT.LOOP:
+PIVOT.I_LOOP:
   INY
   CMP (0x30),Y
-  BCC I_LOOP_END
-  BEQ I_LOOP_END
-  BCS I_LOOP
-I_LOOP_END:
+  BCC PIVOT.I_LOOP_END
+  BEQ PIVOT.I_LOOP_END
+  BCS PIVOT.I_LOOP
+PIVOT.I_LOOP_END:
   STX tmp_j
   STY tmp_i
   LDX tmp_i  // x = i
   LDY tmp_j  // y = j
-J_LOOP:
+PIVOT.J_LOOP:
   DEY
   CMP (0x30),Y
-  BCC J_LOOP
-J_LOOP_END:
+  BCC PIVOT.J_LOOP
+PIVOT.J_LOOP_END:
   STY tmp_j
   CPX tmp_j
-  BCC SWAP
+  BCC PIVOT.SWAP
   TYA
   RTS  // Return with Acc - j
-SWAP:
+PIVOT.SWAP:
   STA tmp_pivot
   STX tmp_i
   LDA (0x30),Y  // Acc = A[j]
@@ -269,4 +265,4 @@ SWAP:
   LDA tmp_pivot
   LDX tmp_j
   CLC
-  BCC LOOP
+  BCC PIVOT.LOOP

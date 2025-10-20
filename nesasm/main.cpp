@@ -7,7 +7,8 @@
 
 int main() {
   // std::string filename = "../rom_asm/fibonacci.asm";
-  std::string filename = "../rom_asm/arithmetic.asm";
+  // std::string filename = "../rom_asm/arithmetic.asm";
+  std::string filename = "../rom_asm/sorting_no_blocks.asm";
   // std::string filename = "../rom_asm/sorting.asm";
   std::ifstream file(filename);
   if (!file) {
@@ -28,6 +29,10 @@ int main() {
 
 #ifdef TESTING
   assembler.ast.print();
+
+  for (auto r : assembler.allocator.memory_blocks) {
+    std::cout << std::hex << r.first << " " << r.second << std::dec << '\n';
+  }
 #endif
 
   std::vector<uint8_t> code = assembler.generate_machine_code();
