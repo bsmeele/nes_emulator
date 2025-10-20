@@ -62,3 +62,29 @@ std::string AddressModeUtil::to_string(AddressMode addr_mode) {
   }
 }
 
+std::optional<size_t> AddressModeUtil::get_size(AddressMode addr_mode) {
+  switch (addr_mode) {
+    case AddressMode::Accumulator:
+    case AddressMode::Implied:
+      return 0;
+    case AddressMode::Immediate:
+    case AddressMode::IndirectX:
+    case AddressMode::IndirectY:
+    case AddressMode::Relative:
+    case AddressMode::ZeroPage:
+    case AddressMode::ZeroPageX:
+    case AddressMode::ZeroPageY:
+      return 1;
+    case AddressMode::Absolute:
+    case AddressMode::AbsoluteX:
+    case AddressMode::AbsoluteY:
+    case AddressMode::Indirect:
+      return 2;
+    case AddressMode::AmbiguousZeropageOrAbsoluteOrRelative:
+    case AddressMode::AmbiguousZeropageXOrAbsoluteX:
+    case AddressMode::AmbiguousZeropageYOrAbsoluteY:
+    case AddressMode::NotSupported:
+    default:
+      return {};
+  }
+}

@@ -6,28 +6,29 @@
 
 NROM::NROM(const std::vector<uint8_t>& rom) {  // TODO
   if (rom[0] != 0x4E || rom[1] != 0x45 || rom[2] != 0x53 || rom[3] != 0x1A) {
-    std::cout << "Invalid .nes format" << std::endl;
+    
+    throw std::runtime_error("Invalid .nes format");
     return;
   }
 
   uint8_t mapper_num = (rom[7] & 0xF0) | ((rom[6] & 0xF0) >> 4);
   if (mapper_num != 0) {
       std::ostringstream oss;
-      oss << "Invalid mapper number " << mapper_num << " for NROM" << std::endl;
+      oss << "Invalid mapper number " << mapper_num << " for NROM";
       throw std::invalid_argument(oss.str());
   }
 
   uint8_t prg_rom_size = rom[4];
   if (prg_rom_size > 2) {
     std::ostringstream oss;
-    oss << "Invalid PRG ROM size " << prg_rom_size << " for NROM" << std::endl;
+    oss << "Invalid PRG ROM size " << prg_rom_size << " for NROM";
     throw std::invalid_argument(oss.str());
   }
 
   uint8_t chr_rom_size = rom[5];
   if (chr_rom_size > 1) {
     std::ostringstream oss;
-    oss << "Invalid CHR ROM size " << chr_rom_size << " for NROM" << std::endl;
+    oss << "Invalid CHR ROM size " << chr_rom_size << " for NROM";
     throw std::invalid_argument(oss.str());
   }
 

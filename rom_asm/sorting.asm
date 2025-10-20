@@ -1,6 +1,7 @@
-.reserve $00-$0F  // Bubble sort array
-.reserve $10-$1F  // Insertion sort array
-.reserve $20-$2F  // Quicksort array
+.reserve $00 $0F  // Bubble sort array
+.reserve $10 $1F  // Insertion sort array
+.reserve $20 $2F  // Quicksort array
+.reserve $0300 $0302  // Array pointer and length
 
 START:
   LDX #0x00
@@ -151,7 +152,7 @@ END_INNER:
 END_OUTER:
   RTS
 
-.block INSERTIONSORT, entry=START
+.block INSERTIONSORT entry=START
 START:
   // 0x0030-0x0031 is the pointer to the list
   // n is written to 0x0032 by caller
@@ -190,7 +191,7 @@ END_INNER_1:
 END_OUTER:
   RTS
 
-.block QUICKSORT, entry=QUICKSORT_SETUP
+.block QUICKSORT entry=QUICKSORT_SETUP
 // 0x0030-0x0031 is the pointer to the list
 // The length of the list is written to 0x0032 by the caller
 QUICKSORT_SETUP:
@@ -225,7 +226,7 @@ QUICKSORT_START:
 END_QUICKSORT:
   RST
   
-.block PIVOT, entry=START_PIVOT
+.block PIVOT entry=START_PIVOT
 START_PIVOT:
   // y = lo, x = hi
   LDA (0x30),Y  // Acc = pivot

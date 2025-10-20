@@ -83,6 +83,17 @@ bool OperationUtil::is_branch(Operation op) {
   }
 }
 
+bool OperationUtil::is_jump(Operation op) {
+  switch (op) {
+    case Operation::JMP:
+    case Operation::JSR:
+    case Operation::RTS:
+      return true;
+    default:
+      return false;
+  }
+}
+
 std::string OperationUtil::to_string(Operation op) {
   switch (op) {
     case Operation::ADC:
@@ -231,7 +242,7 @@ const std::unordered_map<std::string, Operation> operation_parse = {
   {"INX", Operation::INX},
   {"INY", Operation::INY},
   {"JMP", Operation::JMP},
-  {"LSR", Operation::JSR},
+  {"JSR", Operation::JSR},
   {"LDA", Operation::LDA},
   {"LDX", Operation::LDX},
   {"LDY", Operation::LDY},

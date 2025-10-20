@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <optional>
 
 enum class AddressMode: uint8_t {
   Absolute,
@@ -27,8 +28,8 @@ enum class AddressMode: uint8_t {
 
 namespace AddressModeUtil {
   bool is_address_mode(AddressMode addr_mode);
-
   std::string to_string(AddressMode addr_mode);
+  std::optional<size_t> get_size(AddressMode addr_mode);
 }
 
 #endif  // ADDRESS_MODE_H

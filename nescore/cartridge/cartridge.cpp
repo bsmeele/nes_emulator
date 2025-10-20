@@ -24,7 +24,7 @@ void Cartridge::load_rom(const std::vector<uint8_t>& rom) {
       break;
     default:
       std::ostringstream oss;
-      oss << "Mapper " << mapper_num << " not supported" << std::endl;
+      oss << "Mapper " << mapper_num << " not supported";
       throw std::invalid_argument(oss.str());
       break;
   }

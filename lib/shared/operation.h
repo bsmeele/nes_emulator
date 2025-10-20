@@ -68,9 +68,9 @@ namespace OperationUtil {
   bool is_operation(Operation op);
 
   bool is_branch(Operation op);
+  bool is_jump(Operation op);
 
   std::string to_string(Operation op);
-
   Operation from_string(std::string op);
 }
 

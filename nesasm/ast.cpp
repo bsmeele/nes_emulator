@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "utils.h"
 
 #include <stdexcept>
 #include <regex>
@@ -66,7 +67,7 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
 
     } else {  // No match
       std::ostringstream e;
-      e << "Invalid operand: " << addr_mode_str << '\n'; 
+      e << "Invalid operand: " << addr_mode_str; 
       throw std::runtime_error(e.str());
     }
 
@@ -86,149 +87,12 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
   return std::pair(addr_mode, operand_str);
 }
 
-std::variant<uint16_t, std::string> parse_operand(std::string operand_str) {
-  std::variant<uint16_t, std::string> operand;
-
-  int base;
-
-  if (operand_str.empty()) {
-    return "";
-  } else if (operand_str.front() == '$') {
-    base = 16;
-    operand_str = operand_str.substr(1);
-  } else if (operand_str.length() > 1 && (operand_str.substr(0, 2) == "0x" || operand_str.substr(0, 2) == "0X")) {
-    base = 16;
-    operand_str = operand_str.substr(2);
-  } else if (operand_str.front() == '%') {
-    base = 2;
-    operand_str = operand_str.substr(1);
-  } else if (operand_str.length() > 1 && (operand_str.substr(0, 2) == "0b" || operand_str.substr(0, 2) == "0B")) {
-    base = 2;
-    operand_str = operand_str.substr(2);
-  } else if (operand_str.length() > 1 && operand_str.front() == '0') {
-    base = 8;
-    operand_str = operand_str.substr(1);
-  } else if(std::isdigit(operand_str.front())) {
-    base = 10;
-  } else {
-    static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_]*$)");
-    if (!std::regex_match(operand_str, symbol_regex)) {
-        std::ostringstream msg;
-        msg << "Invalid symbol operand: " << operand_str << '\n'; 
-        throw std::runtime_error(msg.str());
-    }
-    return operand_str;
-  }
-
-  try {
-    size_t pos;
-    operand = static_cast<uint16_t>(std::stoul(operand_str, &pos, base));
-
-    if (pos != operand_str.length()) {
-      std::ostringstream msg;
-      msg << "Invalid numerical operand: " << operand_str << " base " << base << '\n'; 
-      throw std::runtime_error(msg.str());
-    }
-  } catch (...) {
-    std::ostringstream msg;
-    msg << "Invalid numerical operand: " << operand_str << " base " << base << '\n'; 
-    throw std::runtime_error(msg.str());
-  }
-
-  return operand;
-
-  // if (operand_str.empty()) {
-  //   operand = "";
-
-  // } else if (std::isdigit(operand_str.front())) {
-  //   try {
-  //     size_t pos;
-  //     operand = static_cast<uint16_t>(std::stoul(operand_str, &pos));
-
-  //     if (pos != operand_str.length()) {
-  //       std::ostringstream e;
-  //       e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
-  //       throw std::runtime_error(e.str());
-  //     }
-  //   } catch (...) {
-  //     std::ostringstream e;
-  //     e << "Invalid decimal numerical operand: " << operand_str << '\n'; 
-  //     throw std::runtime_error(e.str());
-  //   }
-
-  // } else if (operand_str.front() == '$' || (operand_str.length() > 1 && operand_str.substr(0, 2) == "0x")) {
-  //   if (operand_str.front() == '$') {
-  //     operand_str = operand_str.substr(1);
-  //   } else {
-  //     operand_str = operand_str.substr(2);
-  //   }
-
-  //   try {
-  //     size_t pos;
-  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 16));
-
-  //     if (pos != operand_str.length() - 1) {
-  //       std::ostringstream e;
-  //       e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
-  //       throw std::runtime_error(e.str());
-  //     }
-  //   } catch (...) {
-  //     std::ostringstream e;
-  //     e << "Invalid hexadecimal numerical operand: " << operand_str << '\n'; 
-  //     throw std::runtime_error(e.str());
-  //   }
-
-  // } else if (operand_str.front() == '@') {
-  //   try {
-  //     size_t pos;
-  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 8));
-
-  //     if (pos != operand_str.length() - 1) {
-  //       std::ostringstream e;
-  //       e << "Invalid octal numerical operand: " << operand_str << '\n'; 
-  //       throw std::runtime_error(e.str());
-  //     }
-  //   } catch (...) {
-  //     std::ostringstream e;
-  //     e << "Invalid octal numerical operand: " << operand_str << '\n'; 
-  //     throw std::runtime_error(e.str());
-  //   }
-
-  // } else if (operand_str.front() == '$') {
-  //   try {
-  //     size_t pos;
-  //     operand = static_cast<uint16_t>(std::stoul(operand_str.substr(1), &pos, 2));
-
-  //     if (pos != operand_str.length() - 1) {
-  //       std::ostringstream e;
-  //       e << "Invalid binary numerical operand: " << operand_str << '\n'; 
-  //       throw std::runtime_error(e.str());
-  //     }
-  //   } catch (...) {
-  //     std::ostringstream e;
-  //     e << "Invalid binary numerical operand: " << operand_str << '\n'; 
-  //     throw std::runtime_error(e.str());
-  //   }
-
-  // } else {
-  //   static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_]*$)");
-  //   if (!std::regex_match(operand_str, symbol_regex)) {
-  //       std::ostringstream e;
-  //       e << "Invalid symbol operand: " << operand_str << '\n'; 
-  //       throw std::runtime_error(e.str());
-  //   }
-  //   operand = operand_str;
-  // }
-
-  // return operand;
-}
-
 Instruction parse_instruction(std::vector<std::string> line) {
   // Parse operation
   Operation operation = OperationUtil::from_string(line[0]);
   if (operation == Operation::NotSupported) {
     std::ostringstream msg;
-    msg << "Invalid instruction: " << line[0] << '\n'; 
+    msg << "Invalid instruction: " << line[0]; 
     throw std::runtime_error(msg.str());
   }
 
@@ -242,15 +106,16 @@ Instruction parse_instruction(std::vector<std::string> line) {
   }
 
   // Parse operand
-  std::variant<uint16_t, std::string> operand = parse_operand(operand_str);
+  std::variant<uint16_t, std::string> operand = Utils::parse_operand(operand_str);
 
   return Instruction{addr_mode, operation, operand};
 }
 
 AST::AST(std::stringstream& asm_src) {
+  // std::string curr_block = "global";
   std::string line;
   int line_num = 0;
-  int instr_num = 0;
+  size_t instr_num = 0;
 
   while (std::getline(asm_src, line)) {
     line_num += 1;
@@ -262,7 +127,19 @@ AST::AST(std::stringstream& asm_src) {
 
     // Resolve each line type
     if (split_line[0].front() == '.') {  // Directive
-      // Currently no directives implemented
+      std::string directive = split_line[0].substr(1);
+      std::vector<std::string> arguments;
+      if (split_line[0].size() > 1) {
+        arguments = std::vector<std::string>(split_line.begin() + 1, split_line.end());
+      }
+
+      if (directive == "reserve") {
+        this->unresolevd_directives.push_back(Directive{ DirectiveType::Reserve, arguments });
+        
+      } else {
+        std::string msg = "Invalid directive: " + directive + " at line " + std::to_string(line_num);
+        throw std::runtime_error(msg);
+      }
 
     } else if (split_line[0].back() == ':') {  // Label
       split_line[0].pop_back();
@@ -272,14 +149,11 @@ AST::AST(std::stringstream& asm_src) {
       Instruction instr;
       try {
         instr = parse_instruction(split_line);
+        instr.line = line_num;
       } catch (std::exception &e) {
         std::string msg = e.what();
-        
-        if (!msg.empty() && msg.back() == '\n') {
-          msg.pop_back();
-        }
 
-        msg += " at line " + std::to_string(line_num) + '\n';
+        msg += " at line " + std::to_string(line_num);
         throw std::runtime_error(msg);
       }
 
@@ -296,14 +170,21 @@ AST::AST(std::stringstream& asm_src) {
 void AST::print() {
   std::cout << "Instructions:\n";
   for (int i = 0; i < this->instr_list.size(); i++) {
-    std::cout
-      << i << ":"
-      << " " << OperationUtil::to_string(this->instr_list[i].operation)
-      << " " << AddressModeUtil::to_string(this->instr_list[i].address_mode);
+    Instruction& instr = this->instr_list[i];
 
-      if (const std::string* op = std::get_if<std::string>(&this->instr_list[i].operand)) {
+    std::cout << i;
+    if (instr.location.has_value()) {
+      std::cout << " (0x" << std::uppercase << std::hex << instr.location.value() << std::dec << ")";
+      std::cout.unsetf(std::ios_base::uppercase);
+    }
+
+    std::cout
+      << ": " << OperationUtil::to_string(instr.operation)
+      << " " << AddressModeUtil::to_string(instr.address_mode);
+
+      if (const std::string* op = std::get_if<std::string>(&instr.operand)) {
         std::cout << ' ' << *op;
-      } else if (const std::uint16_t* op = std::get_if<uint16_t>(&this->instr_list[i].operand)) {
+      } else if (const std::uint16_t* op = std::get_if<uint16_t>(&instr.operand)) {
         std::cout << " " << std::uppercase << std::hex << static_cast<int>(*op) << std::dec;
         std::cout.unsetf(std::ios_base::uppercase);
       }
