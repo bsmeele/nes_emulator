@@ -1,6 +1,5 @@
 #include "ram.h"
 
-#include <iostream>
 #include <cassert>
 
 RAM::RAM() {}

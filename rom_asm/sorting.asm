@@ -1,7 +1,7 @@
 .reserve $00 $0F  // Bubble sort array
 .reserve $10 $1F  // Insertion sort array
 .reserve $20 $2F  // Quicksort array
-.reserve $0300 $0302  // Array pointer and length
+.reserve $30 $32  // Array pointer and length
 
 START:
   LDX #0x00
@@ -99,7 +99,7 @@ START:
   STA 0x31
   LDA #0x10
   STA 0x32
-  JSR INSERTIONSORT.START
+  JSR INSERTIONSORT
 
   LDA #0x20
   STA 0x30
@@ -107,11 +107,11 @@ START:
   STA 0x31
   LDA #0x10
   STA 0x32
-  JSR QUICKSORT.START
+  JSR QUICKSORT
 
   BRK
 
-.block BUBBLESORT
+.block BUBBLESORT entry=START
 START:
   // 0x0030-0x0031 is the pointer to the list
   // n is written to 0x0032 by caller
@@ -152,7 +152,7 @@ END_INNER:
 END_OUTER:
   RTS
 
-.block INSERTIONSORT entry=START
+.block INSERTIONSORT
 START:
   // 0x0030-0x0031 is the pointer to the list
   // n is written to 0x0032 by caller
@@ -171,8 +171,8 @@ INNER_LOOP:
   DEY
   LDA (0x30),Y
   CMP 0x33
-  BCC END_INNER
-  BEQ END_INNER
+  BCC END_INNER_0
+  BEQ END_INNER_0
   INY
   STA (0x30),Y
   DEY
@@ -191,43 +191,43 @@ END_INNER_1:
 END_OUTER:
   RTS
 
-.block QUICKSORT entry=QUICKSORT_SETUP
+.block QUICKSORT entry=SETUP
 // 0x0030-0x0031 is the pointer to the list
 // The length of the list is written to 0x0032 by the caller
-QUICKSORT_SETUP:
+SETUP:
   LDX 0x32
   DEX
-  LDY $0x00
-QUICKSORT_START:
+  LDY #0x00
+START:
   CPY #0x00
-  BCC END_QUICKSORT
+  BCC END
   CPX #0x00
-  BCC END_QUICKSORT
+  BCC END
   STX tmp_hi
   CPY tmp_hi
-  BCS END_QUICKSORT
+  BCS END
   TXA
   PHA
   TYA
   PHA
-  JSR START_PIVOT  // returne value is passed through accumulator
+  JSR PIVOT  // returne value is passed through accumulator
   TAX
   PLA
   TAY
   TXA
   PHA
-  JSR QUICKSORT_START  // returne value is passed through accumulator
+  JSR START  // returne value is passed through accumulator
   PLA
   TAY
   INY
   PLA
   TAX
-  JSR QUICKSORT_START
-END_QUICKSORT:
+  JSR START
+END:
   RTS
-  
-.block PIVOT entry=START_PIVOT
-START_PIVOT:
+
+.block PIVOT entry=START
+START:
   // y = lo, x = hi
   LDA (0x30),Y  // Acc = pivot
   DEY  // y = i

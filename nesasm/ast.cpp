@@ -55,13 +55,13 @@ std::pair<AddressMode, std::string> parse_address_mode(std::string addr_mode_str
   } else if (addr_mode_str.front() == '(') {  // Indirect variant
     if (addr_mode_str.length() >= 4 &&
       (addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",X)") == 0
-      || addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",x)"))) {  // Indirect X
+      || addr_mode_str.compare(addr_mode_str.length() - 3, 3, ",x)") == 0)) {  // Indirect X
       addr_mode = AddressMode::IndirectX;
       operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 4);
 
     } else if (addr_mode_str.size() >= 4 &&
         (addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),Y") == 0
-        || addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),y"))) {  // Indirect Y
+        || addr_mode_str.compare(addr_mode_str.length() - 3, 3, "),y") == 0)) {  // Indirect Y
       addr_mode = AddressMode::IndirectY;
       operand_str = addr_mode_str.substr(1, addr_mode_str.length() - 4);
 
@@ -109,7 +109,6 @@ Instruction parse_instruction(std::vector<std::string> line) {
   AddressMode addr_mode;
   std::string operand_str;
   if (line.size() > 1) {
-    // std::transform(line[1].begin(), line[1].end(), line[1].begin(), ::toupper);
     std::tie(addr_mode, operand_str) = parse_address_mode(line[1]);
   } else {
     addr_mode = AddressMode::Implied;
@@ -125,10 +124,11 @@ Instruction parse_instruction(std::vector<std::string> line) {
 }
 
 AST::AST(std::stringstream& asm_src) {
-  // CodeBlock block;
-  // block.name = "global";
+  CodeBlock block;
+  block.name = "global";
   std::string line;
   int line_num = 0;
+  size_t block_num = 0;
   size_t instr_num = 0;
 
   while (std::getline(asm_src, line)) {
@@ -147,7 +147,50 @@ AST::AST(std::stringstream& asm_src) {
         arguments = std::vector<std::string>(split_line.begin() + 1, split_line.end());
       }
 
-      if (directive == "reserve") {
+      if (directive == "block") {
+        if (!block.instr_list.empty()) {
+          this->block_list.push_back(block);
+        }
+
+        block = CodeBlock();
+        block_num += 1;
+        instr_num = 0;
+
+        if (arguments.size() < 1 || arguments[0].empty()) {
+          std::string msg = "Empty block name at line " + std::to_string(line_num);
+          throw std::runtime_error(msg);
+        }
+
+        std::variant<uint16_t, std::string> label = Utils::parse_operand(arguments[0]);
+        if (const uint16_t* l = std::get_if<uint16_t>(&label)) {
+          std::string msg = "Invalid block name: "
+            + std::to_string(*l)
+            + " at line " + std::to_string(line_num);
+          throw std::runtime_error(msg);
+        }
+
+        block.name = std::get<std::string>(label);
+
+        if (arguments.size() > 1) {
+          std::string label = arguments[1];
+          if (label.length() > 6 && label.substr(0, 6) == "entry=") {
+            label = label.substr(6);
+          }
+
+          std::variant<uint16_t, std::string> operand = Utils::parse_operand(label);
+          if (const std::string* l = std::get_if<std::string>(&operand)) {
+            block.entry = *l;
+          } else {
+            std::string msg = "Invalid entry label: "
+              + label + " at line " + std::to_string(line_num);
+            throw std::runtime_error(msg);
+          }
+        }
+
+        this->block_map.insert({block.name, block_num});
+        this->label_map.insert({block.name + "." + block.entry, std::pair(block_num, instr_num)});
+
+      } else if (directive == "reserve") {
         this->unresolevd_directives.push_back(Directive{ DirectiveType::Reserve, arguments });
         
       } else {
@@ -159,8 +202,7 @@ AST::AST(std::stringstream& asm_src) {
       std::variant<uint16_t, std::string> label = Utils::parse_operand(split_line[0].substr(0, split_line[0].length()-1));
 
       if (const std::string* l = std::get_if<std::string>(&label)) {
-        // this->label_map.insert({block.name + *l, instr_num});
-        this->label_map.insert({*l, instr_num});
+        this->label_map.insert({block.name + "." + *l, std::pair(block_num, instr_num)});
 
       } else {
         std::string msg = "Invalid label: "
@@ -181,48 +223,46 @@ AST::AST(std::stringstream& asm_src) {
         throw std::runtime_error(msg);
       }
 
-      if (instr.operand.has_value() && std::holds_alternative<std::string>(instr.operand.value())) {
-        this->unresolved_symbols.insert(std::get<std::string>(instr.operand.value()));
-      }
-
-      // block.instr_list.push_back(instr);
-      this->instr_list.push_back(instr);
+      block.instr_list.push_back(instr);
       instr_num += 1;
     }
   }
 
-  // this->block_list.push_back(block);
+  this->block_list.push_back(block);
 }
 
 void AST::print() {
   std::cout << "Instructions:\n";
-  for (int i = 0; i < this->instr_list.size(); i++) {
-    Instruction& instr = this->instr_list[i];
+  for (int b = 0; b < this->block_list.size(); b++) {
+    std::cout << ".block " << b << ": " << this->block_list[b].name << "\n";
+    for (int i = 0; i < this->block_list[b].instr_list.size(); i++) {
+      Instruction& instr = this->block_list[b].instr_list[i];
 
-    std::cout << i;
-    if (instr.location.has_value()) {
-      std::cout << " (0x" << std::uppercase << std::hex << instr.location.value() << std::dec << ")";
-      std::cout.unsetf(std::ios_base::uppercase);
-    }
-
-    std::cout
-      << ": " << OperationUtil::to_string(instr.operation)
-      << " " << AddressModeUtil::to_string(instr.address_mode);
-
-      if (instr.operand.has_value()) {
-        if (const std::string* op = std::get_if<std::string>(&instr.operand.value())) {
-          std::cout << ' ' << *op;
-        } else if (const std::uint16_t* op = std::get_if<uint16_t>(&instr.operand.value())) {
-          std::cout << " " << std::uppercase << std::hex << static_cast<int>(*op) << std::dec;
-          std::cout.unsetf(std::ios_base::uppercase);
-        }
+      std::cout << i;
+      if (instr.location.has_value()) {
+        std::cout << " (0x" << std::uppercase << std::hex << instr.location.value() << std::dec << ")";
+        std::cout.unsetf(std::ios_base::uppercase);
       }
 
-      std::cout << '\n';
+      std::cout
+        << ": " << OperationUtil::to_string(instr.operation)
+        << " " << AddressModeUtil::to_string(instr.address_mode);
+
+        if (instr.operand.has_value()) {
+          if (const std::string* op = std::get_if<std::string>(&instr.operand.value())) {
+            std::cout << ' ' << *op;
+          } else if (const std::uint16_t* op = std::get_if<uint16_t>(&instr.operand.value())) {
+            std::cout << " " << std::uppercase << std::hex << static_cast<int>(*op) << std::dec;
+            std::cout.unsetf(std::ios_base::uppercase);
+          }
+        }
+
+        std::cout << '\n';
+    }
   }
 
   std::cout << "\nLabels:\n";
   for (auto [k, v] : this->label_map) {
-    std::cout << k << ": " << v << '\n';
+    std::cout << k << ": " << v.first << " " << v.second << '\n';
   }
 }

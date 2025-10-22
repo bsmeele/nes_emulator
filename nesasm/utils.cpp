@@ -28,7 +28,7 @@ std::variant<uint16_t, std::string> Utils::parse_operand(std::string operand_str
   } else if(std::isdigit(operand_str.front())) {
     base = 10;
   } else {
-    static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_.]*$)");
+    static const std::regex symbol_regex(R"(^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)?$)");
     if (!std::regex_match(operand_str, symbol_regex)) {
         std::ostringstream msg;
         msg << "Invalid symbol operand: " << operand_str; 

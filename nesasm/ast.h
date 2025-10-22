@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <variant>
 #include <optional>
+#include <utility>
 
 struct Instruction {
   AddressMode address_mode;
@@ -32,10 +33,9 @@ struct CodeBlock {
 
 struct AST {
   std::vector<CodeBlock> block_list;
-  std::vector<Instruction> instr_list;
-  std::unordered_map<std::string, size_t> label_map;
+  std::unordered_map<std::string, size_t> block_map;
+  std::unordered_map<std::string, std::pair<size_t, size_t>> label_map;
   std::unordered_map<std::string, uint16_t> variable_map;
-  std::unordered_set<std::string> unresolved_symbols;
   std::vector<Directive> unresolevd_directives;
 
   AST() = default;

@@ -4,7 +4,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <iostream>
 
 TEST_CASE( "Assembler allocator", "[Allocator]" ) {
   Allocator alloc = Allocator();
@@ -40,56 +39,4 @@ TEST_CASE( "Assembler allocator", "[Allocator]" ) {
     REQUIRE( alloc.memory_blocks[2].first == 0x0200 );
     REQUIRE( alloc.memory_blocks[2].second == 0x07FF );
   }
-
-  // SECTION( "Reserve(size)" ) {
-  //   std::optional<uint16_t> loc = alloc.reserve_block(5);
-
-  //   REQUIRE( loc == 0x0000 );
-  //   REQUIRE( alloc.memory_blocks[0].first == 0x0006 );
-  //   REQUIRE( alloc.memory_blocks[0].second == 0x00FF );
-  //   REQUIRE( alloc.memory_blocks[1].first == 0x0200 );
-  //   REQUIRE( alloc.memory_blocks[1].second == 0x07FF );
-  // }
-
-  // SECTION( "Reserve(location)" ) {
-  //   std::optional<uint16_t> loc = alloc.reserve_at(0x00A0);
-
-  //   REQUIRE( loc == 0x00A0 );
-  //   REQUIRE( alloc.memory_blocks[0].first == 0x0000 );
-  //   REQUIRE( alloc.memory_blocks[0].second == 0x009F );
-  //   REQUIRE( alloc.memory_blocks[1].first == 0x00A1 );
-  //   REQUIRE( alloc.memory_blocks[1].second == 0x00FF );
-  //   REQUIRE( alloc.memory_blocks[2].first == 0x0200 );
-  //   REQUIRE( alloc.memory_blocks[2].second == 0x07FF );
-  // }
-
-  // SECTION( "Reserve location not available" ) {
-  //   std::optional<uint16_t> loc = alloc.reserve_at(0x01A0, 1);
-
-  //   REQUIRE( !loc.has_value() );
-  //   REQUIRE( alloc.memory_blocks[0].first == 0x0000 );
-  //   REQUIRE( alloc.memory_blocks[0].second == 0x00FF );
-  //   REQUIRE( alloc.memory_blocks[1].first == 0x0200 );
-  //   REQUIRE( alloc.memory_blocks[1].second == 0x07FF );
-  // }
-
-  // SECTION( "Reserve no space" ) {
-  //   std::optional<uint16_t> loc = alloc.reserve_at(0x00F0, 17);
-
-  //   REQUIRE( !loc.has_value() );
-  //   REQUIRE( alloc.memory_blocks[0].first == 0x0000 );
-  //   REQUIRE( alloc.memory_blocks[0].second == 0x00FF );
-  //   REQUIRE( alloc.memory_blocks[1].first == 0x0200 );
-  //   REQUIRE( alloc.memory_blocks[1].second == 0x07FF );
-  // }
-
-  // SECTION( "Reserve(size) no space" ) {
-  //   std::optional<uint16_t> loc = alloc.reserve_at(257);
-
-  //   REQUIRE( !loc.has_value() );
-  //   REQUIRE( alloc.memory_blocks[0].first == 0x0000 );
-  //   REQUIRE( alloc.memory_blocks[0].second == 0x00FF );
-  //   REQUIRE( alloc.memory_blocks[1].first == 0x0200 );
-  //   REQUIRE( alloc.memory_blocks[1].second == 0x07FF );
-  // }
 }

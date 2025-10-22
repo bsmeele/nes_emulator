@@ -75,8 +75,8 @@ TEST_CASE( "Test ROM CPU", "[CPU]" ) {
     REQUIRE( nes.bus.read(0x0008) == 0xD2 );  // 6 * 35
     REQUIRE( nes.bus.read(0x000B) == 0x00 );  // 0 / 8
     REQUIRE( nes.bus.read(0x000C) == 0x00 );  // 0 % 8
-    REQUIRE( nes.bus.read(0x000F) == 0x00 );  // 210 / 0
-    REQUIRE( nes.bus.read(0x0010) == 0xFF );  // 210 % 0
+    REQUIRE( nes.bus.read(0x000F) == 0xFF );  // 210 / 0
+    REQUIRE( nes.bus.read(0x0010) == 0x00 );  // 210 % 0
     REQUIRE( nes.bus.read(0x0013) == 0x1A );  // 210 / 8
     REQUIRE( nes.bus.read(0x0014) == 0x02 );  // 210 % 8
     REQUIRE( nes.bus.read(0x0017) == 0x1E );  // 210 / 7

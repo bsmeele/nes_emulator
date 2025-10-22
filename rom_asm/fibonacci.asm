@@ -3,7 +3,7 @@ START:
 	STA $00
 	LDA #1
 	STA $01
-	LDX #1
+	LDX #0
 LOOP:
 	LDA $00,X
 	INX
