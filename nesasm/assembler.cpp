@@ -11,6 +11,7 @@ void Assembler::build_ast(std::stringstream& asm_src) {
   this->ast = AST(asm_src);
 }
 
+// Any directives encountered that are not related to parsing are resolved here
 void Assembler::resolve_directives() {
   for (auto dir : this->ast.unresolevd_directives) {
     switch (dir.directive) {
@@ -46,6 +47,10 @@ void Assembler::resolve_directives() {
   this->ast.unresolevd_directives.clear();
 }
 
+// Due to code blocks, there can be some ambiguity in labels as operands
+// For example: a label name without a block name prefix could refer to
+//   a local label, a global label, or an entry point to another code block
+// This function resolves any such ambiguity
 void Assembler::resolve_label_ambiguity() {
   for (size_t b = 0; b < this->ast.block_list.size(); b++) {
     for (size_t i = 0; i < this->ast.block_list[b].instr_list.size(); i++) {
@@ -79,6 +84,9 @@ void Assembler::resolve_label_ambiguity() {
   }
 }
 
+// Symbols can be used as aliases for memory locations
+// If not defined elsewhere, the assemler automatically allocates space for these variables
+// The space allocated is the first free location
 void Assembler::allocate_variables() {
   for (size_t b = 0; b < this->ast.block_list.size(); b++) {
     for (size_t i = 0; i < this->ast.block_list[b].instr_list.size(); i++) {
@@ -118,6 +126,9 @@ void Assembler::allocate_variables() {
   }
 }
 
+// Up untill this point, symbols could be used as aliases for memory location
+// This function replaces any such symbols with their assigned locations
+// Note that this function does not replace label operands with their jump locations
 void Assembler::resolve_variable_operands() {
   for (auto& block : this->ast.block_list) {
     for (auto& instr : block.instr_list) {
@@ -133,6 +144,12 @@ void Assembler::resolve_variable_operands() {
   }
 }
 
+// During parsing, certian address modes can not be distinguished
+// For example, zeropage and absolute addressing are both identified by the operand being just a number
+// In this instance, the ambiguity can be resolved by determining whether the address is on the zeropage or not
+// However, when the operand uses a symbol as an address alias, this is not possible
+// This function resolves any such ambiguity
+// It assumes all address aliases have been allocated and replaced with their values
 void Assembler::resolve_address_mode_ambiguity() {
   for (auto& block : this->ast.block_list) {
     for (auto& instr : block.instr_list) {
@@ -191,6 +208,10 @@ void Assembler::resolve_address_mode_ambiguity() {
   }
 }
 
+// This function assigns each instruction to a memory location
+// Blocks are placed directly after one another in the order encountered during parsing
+// This version of the assembler assumes the target is an NROM catridge
+//   thus it hardcodes the first instruction to 0x8000 and places each instruction sequentially after that
 void Assembler::allocate_codeblocks() {
   uint16_t addr = 0x8000;
   for (size_t b = 0; b < this->ast.block_list.size(); b++) {
@@ -210,6 +231,8 @@ void Assembler::allocate_codeblocks() {
   }
 }
 
+// This function replaces any encountered label operands with the memory location of the target
+// This function assumes every instruction has been placed
 void Assembler::resolve_labels() {
   for (size_t b = 0; b < this->ast.block_list.size(); b++) {
     for (size_t i = 0; i < this->ast.block_list[b].instr_list.size(); i++) {
@@ -267,6 +290,10 @@ void Assembler::resolve_labels() {
   }
 }
 
+// This function generates the machine code for the program and returns it as a byte vector
+// Each instruction is handled in the order encountered in the source code
+// Note that this function does not consider the where the instruction is placed
+// Instead the placement algorithm is assumed to behave similarly to how the code is generated
 std::vector<uint8_t> Assembler::generate_machine_code() {
   std::vector<uint8_t> machine_code;
   for (size_t b = 0; b < this->ast.block_list.size(); b++) {
@@ -314,6 +341,10 @@ std::vector<uint8_t> Assembler::generate_machine_code() {
   return machine_code;
 }
 
+// This function performs a the full compilation process and outputs the assembled code as a byte vector
+// It assumes the target is an NES NROM cartridge, for which it generates the appropriate header,
+//   pads the machine code to the appropriate size,
+//   and adds a jump instruction to the end which jumps to the top of the file
 std::vector<uint8_t> Assembler::assemble(std::stringstream& source) {
   this->build_ast(source);
   this->resolve_directives();

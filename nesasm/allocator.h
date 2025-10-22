@@ -19,8 +19,8 @@ public:
   std::optional<uint16_t> reserve_at(std::uint16_t location);
   std::optional<uint16_t> reserve_at(std::uint16_t location, std::size_t size);
 
-  std::optional<uint16_t> free(std::uint16_t location);
-  std::optional<uint16_t> free(std::uint16_t location, std::size_t size);
+  // std::optional<uint16_t> free(std::uint16_t location);
+  // std::optional<uint16_t> free(std::uint16_t location, std::size_t size);
 };
 
 #endif  // ALLOCATOR_H
