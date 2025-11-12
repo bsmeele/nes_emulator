@@ -18,6 +18,7 @@ if (TESTING)
     test_rom_cpu.cpp
     test_asm_allocator.cpp
     test_assembler.cpp
+    test_ppu.cpp
   )
   target_link_libraries(tests PRIVATE nescore)
   target_link_libraries(tests PRIVATE asmcore)

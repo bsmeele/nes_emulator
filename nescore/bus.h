@@ -10,9 +10,10 @@ class Bus {
 private:
   std::vector<MemoryDevice*> devices;
   uint8_t open_bus;
+  uint8_t source;  // 0 for CPU, 1 for PPU
 
 public:
-  Bus();
+  Bus(uint8_t source);
   ~Bus();
 
   void mount(MemoryDevice* device);

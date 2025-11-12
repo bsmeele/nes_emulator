@@ -3,6 +3,8 @@ add_library(nescore
   cpu/cpu.cpp
   cpu/address_modes.cpp
   cpu/operations.cpp
+  ppu/ppu.cpp
+  ppu/sprite_unit.cpp
   bus.cpp
   ram.cpp
   cartridge/cartridge.cpp

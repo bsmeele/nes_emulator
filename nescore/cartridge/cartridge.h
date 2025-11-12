@@ -18,8 +18,8 @@ public:
 
   void load_rom(const std::vector<uint8_t>& rom);
 
-  std::optional<uint8_t> read(uint16_t address) override;
-  void write(uint16_t address, uint8_t data) override;
+  std::optional<uint8_t> read(uint16_t address, uint8_t source) override;
+  void write(uint16_t address, uint8_t data, uint8_t source) override;
 };
 
 #endif  // CARTRIDGE_H

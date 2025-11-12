@@ -30,15 +30,15 @@ void Cartridge::load_rom(const std::vector<uint8_t>& rom) {
   }
 }
 
-std::optional<uint8_t> Cartridge::read(uint16_t address) {
+std::optional<uint8_t> Cartridge::read(uint16_t address, uint8_t source) {
   if (mapper) {
-    return this->mapper->read(address);
+    return this->mapper->read(address, source);
   }
   return {};
 }
 
-void Cartridge::write(uint16_t address, uint8_t data) {
+void Cartridge::write(uint16_t address, uint8_t data, uint8_t source) {
   if (mapper) {
-    this->mapper->write(address, data);
+    this->mapper->write(address, data, source);
   }
 }

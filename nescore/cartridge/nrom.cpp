@@ -4,7 +4,7 @@
 #include <sstream>
 #include <cstring>
 
-NROM::NROM(const std::vector<uint8_t>& rom) {  // TODO
+NROM::NROM(const std::vector<uint8_t>& rom) {
   if (rom[0] != 0x4E || rom[1] != 0x45 || rom[2] != 0x53 || rom[3] != 0x1A) {
     
     throw std::runtime_error("Invalid .nes format");
@@ -62,8 +62,9 @@ NROM::NROM(const std::vector<uint8_t>& rom) {  // TODO
     size_t offset = 16 + 512 * trainer_present + 0x4000 * prg_rom_size;
     if (offset + 0x2000 > rom.size()) {
       throw std::out_of_range("Not enough CHR ROM data in file");
-    std::memcpy(this->chr_rom_bank1, rom.data() + offset, 0x2000);
     }
+    
+    std::memcpy(this->chr_rom_bank1, rom.data() + offset, 0x2000);
   }
 }
 
@@ -74,26 +75,42 @@ NROM::~NROM() {
   delete[] this->chr_rom_bank1;
 }
 
-std::optional<uint8_t> NROM::read(uint16_t address) {
-  if (address < 0x8000) {
-    // Outside PRG ROM range
+std::optional<uint8_t> NROM::read(uint16_t address, uint8_t source) {
+  if (source == 0) {
+    if (address < 0x8000) {
+      // Outside PRG ROM range
+      return {};
+    }
+
+    if (address <= 0xBFFF) {
+      return this->prg_rom_bank1[address & 0x3FFF];
+    }
+
+    if (this->prg_rom_bank2) {
+      return this->prg_rom_bank2[address & 0x3FFF];
+    } else {
+      return this->prg_rom_bank1[address & 0x3FFF];
+    }
+
+    // Unreachable
     return {};
+  } else if (source == 1) {
+    if (address > 0x1FFF) {
+      // Outisde of CHR ROM range
+      return {};
+    }
+
+    if (!this->chr_rom_bank1) {
+      // No CHR ROM present
+      return {};
+    }
+
+    return this->chr_rom_bank1[address];
   }
 
-  if (address <= 0xBFFF) {
-    return this->prg_rom_bank1[address & 0x3FFF];
-  }
-
-  if (this->prg_rom_bank2) {
-    return this->prg_rom_bank2[address & 0x3FFF];
-  } else {
-    return this->prg_rom_bank1[address & 0x3FFF];
-  }
-
-  // Unreachable
   return {};
 }
 
-void NROM::write(uint16_t address, uint8_t data) {
+void NROM::write(uint16_t address, uint8_t data, uint8_t source) {
   // contains no writable memory
 }

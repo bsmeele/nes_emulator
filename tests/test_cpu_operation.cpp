@@ -7,7 +7,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "ADC" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
 
       nes.cpu.ADC(0x0001);
@@ -20,7 +20,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
       REQUIRE( nes.cpu.lockout_counter == 1 );
     }
     SECTION( "Base + carry" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
       nes.cpu.flag |= 0x01;
 
@@ -35,7 +35,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Carry flag" ) {
-      nes.bus.write(0x0001, 0x69);
+      nes.cpu_bus.write(0x0001, 0x69);
       nes.cpu.accumulator = 0xCD;
 
       nes.cpu.ADC(0x0001);
@@ -49,7 +49,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0xEF);
+      nes.cpu_bus.write(0x0001, 0xEF);
       nes.cpu.accumulator = 0x11;
 
       nes.cpu.ADC(0x0001);
@@ -63,7 +63,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Overflow flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
       nes.cpu.accumulator = 0x82;
 
       nes.cpu.ADC(0x0001);
@@ -77,7 +77,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
       nes.cpu.accumulator = 0x12;
 
       nes.cpu.ADC(0x0001);
@@ -93,7 +93,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "AND" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
 
       nes.cpu.AND(0x0001);
@@ -105,7 +105,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0xED;
 
       nes.cpu.AND(0x0001);
@@ -117,7 +117,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xFA);
+      nes.cpu_bus.write(0x0001, 0xFA);
       nes.cpu.accumulator = 0xAF;
 
       nes.cpu.AND(0x0001);
@@ -179,11 +179,11 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Memory" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
 
       nes.cpu.ASL(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x68 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x68 );
       REQUIRE( (nes.cpu.flag & 0x01) == 0x00 );  // Carry flag
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
@@ -193,7 +193,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BCC" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x01;
 
@@ -204,7 +204,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BCC(0x0001);
@@ -214,7 +214,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BCC(0x0001);
@@ -224,7 +224,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BCC(0x0001);
@@ -234,7 +234,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
 
       nes.cpu.BCC(0x0001);
@@ -246,7 +246,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BCS" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BCS(0x0001);
@@ -256,7 +256,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x01;
 
@@ -267,7 +267,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x01;
 
@@ -278,7 +278,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x01;
 
@@ -289,7 +289,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
       nes.cpu.flag |= 0x01;
 
@@ -302,7 +302,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BEQ" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BEQ(0x0001);
@@ -312,7 +312,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x02;
 
@@ -323,7 +323,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x02;
 
@@ -334,7 +334,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x02;
 
@@ -345,7 +345,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
       nes.cpu.flag |= 0x02;
 
@@ -358,7 +358,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BIT" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
 
       nes.cpu.BIT(0x0001);
@@ -369,7 +369,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x24;
 
       nes.cpu.BIT(0x0001);
@@ -380,7 +380,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Overflow and negative flag" ) {
-      nes.bus.write(0x0001, 0x4A);
+      nes.cpu_bus.write(0x0001, 0x4A);
       nes.cpu.accumulator = 0x69;
 
       nes.cpu.BIT(0x0001);
@@ -393,7 +393,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BMI" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BMI(0x0001);
@@ -403,7 +403,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x80;
 
@@ -414,7 +414,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x80;
 
@@ -425,7 +425,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x80;
 
@@ -436,7 +436,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
       nes.cpu.flag |= 0x80;
 
@@ -449,7 +449,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BNE" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x02;
 
@@ -460,7 +460,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BNE(0x0001);
@@ -470,7 +470,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BNE(0x0001);
@@ -480,7 +480,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BNE(0x0001);
@@ -490,7 +490,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
 
       nes.cpu.BNE(0x0001);
@@ -502,7 +502,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BPL" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x80;
 
@@ -513,7 +513,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BPL(0x0001);
@@ -523,7 +523,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BPL(0x0001);
@@ -533,7 +533,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BPL(0x0001);
@@ -543,7 +543,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
 
       nes.cpu.BPL(0x0001);
@@ -560,9 +560,9 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.BRK({});
 
-    REQUIRE( nes.bus.read(0x0156) == 0x12 );
-    REQUIRE( nes.bus.read(0x0155) == 0x34 );
-    REQUIRE( nes.bus.read(0x0154) == 0x30 );
+    REQUIRE( nes.cpu_bus.read(0x0156) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x0155) == 0x34 );
+    REQUIRE( nes.cpu_bus.read(0x0154) == 0x30 );
     REQUIRE( nes.cpu.program_counter == 0xFFFE );
     REQUIRE( nes.cpu.flag == 0x04 );  // Interrupt disable flag
     REQUIRE( nes.cpu.stack_pointer == 0x53 );
@@ -571,7 +571,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BVC" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x40;
 
@@ -582,7 +582,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BVC(0x0001);
@@ -592,7 +592,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BVC(0x0001);
@@ -602,7 +602,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
 
       nes.cpu.BVC(0x0001);
@@ -612,7 +612,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
 
       nes.cpu.BVC(0x0001);
@@ -624,7 +624,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "BVS" ) {
     SECTION( "No branch" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
 
       nes.cpu.BVS(0x0001);
@@ -634,7 +634,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.program_counter = 0x0034;
       nes.cpu.flag |= 0x40;
 
@@ -645,7 +645,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x40;
 
@@ -656,7 +656,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch same page negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x00E8;
       nes.cpu.flag |= 0x40;
 
@@ -667,7 +667,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Branch page crossing negative offset" ) {
-      nes.bus.write(0x0001, 0xCE);
+      nes.cpu_bus.write(0x0001, 0xCE);
       nes.cpu.program_counter = 0x0123;
       nes.cpu.flag |= 0x40;
 
@@ -715,7 +715,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
   }
 
   SECTION( "CMP" ) {
-    nes.bus.write(0x0001, 0x12);
+    nes.cpu_bus.write(0x0001, 0x12);
 
     SECTION( "Greater equal" ) {
       nes.cpu.accumulator = 0x34;
@@ -752,7 +752,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
   }
 
   SECTION( "CPX" ) {
-    nes.bus.write(0x0001, 0x12);
+    nes.cpu_bus.write(0x0001, 0x12);
 
     SECTION( "Greater equal" ) {
       nes.cpu.x_index = 0x34;
@@ -789,7 +789,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
   }
 
   SECTION( "CPY" ) {
-    nes.bus.write(0x0001, 0x12);
+    nes.cpu_bus.write(0x0001, 0x12);
 
     SECTION( "Greater equal" ) {
       nes.cpu.y_index = 0x34;
@@ -827,33 +827,33 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "DEC" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
 
       nes.cpu.DEC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x11 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x11 );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x01);
+      nes.cpu_bus.write(0x0001, 0x01);
 
       nes.cpu.DEC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x00 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x00 );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x02 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
 
       nes.cpu.DEC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0xCC );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0xCC );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x80 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
@@ -932,7 +932,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "EOR" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
 
       nes.cpu.EOR(0x0001);
@@ -944,7 +944,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x55);
+      nes.cpu_bus.write(0x0001, 0x55);
       nes.cpu.accumulator = 0x55;
 
       nes.cpu.EOR(0x0001);
@@ -956,7 +956,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0x55);
+      nes.cpu_bus.write(0x0001, 0x55);
       nes.cpu.accumulator = 0xE2;
 
       nes.cpu.EOR(0x0001);
@@ -970,33 +970,33 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "INC" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
 
       nes.cpu.INC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x13 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x13 );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0xFF);
+      nes.cpu_bus.write(0x0001, 0xFF);
 
       nes.cpu.INC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x00 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x00 );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x02 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
 
       nes.cpu.INC(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0xCE );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0xCE );
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x80 );  // Negative flag
       REQUIRE( nes.cpu.lockout_counter == 3 );
@@ -1090,8 +1090,8 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     REQUIRE( nes.cpu.program_counter == 0x4321 );
     REQUIRE( nes.cpu.stack_pointer == 0x54 );
-    REQUIRE( nes.bus.read(0x0156) == 0x12 );
-    REQUIRE( nes.bus.read(0x0155) == 0x33 );
+    REQUIRE( nes.cpu_bus.read(0x0156) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x0155) == 0x33 );
     REQUIRE( nes.cpu.lockout_counter == 3 );
   }
 
@@ -1099,7 +1099,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     nes.cpu.accumulator = 0x00;
 
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
 
       nes.cpu.LDA(0x0001);
 
@@ -1110,7 +1110,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x00);
+      nes.cpu_bus.write(0x0001, 0x00);
 
       nes.cpu.LDA(0x0001);
 
@@ -1121,7 +1121,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
 
       nes.cpu.LDA(0x0001);
 
@@ -1136,7 +1136,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     nes.cpu.x_index = 0x00;
 
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
 
       nes.cpu.LDX(0x0001);
 
@@ -1147,7 +1147,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x00);
+      nes.cpu_bus.write(0x0001, 0x00);
 
       nes.cpu.LDX(0x0001);
 
@@ -1158,7 +1158,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
 
       nes.cpu.LDX(0x0001);
 
@@ -1173,7 +1173,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     nes.cpu.y_index = 0x00;
 
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
 
       nes.cpu.LDY(0x0001);
 
@@ -1184,7 +1184,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x00);
+      nes.cpu_bus.write(0x0001, 0x00);
 
       nes.cpu.LDY(0x0001);
 
@@ -1195,7 +1195,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xCD);
+      nes.cpu_bus.write(0x0001, 0xCD);
 
       nes.cpu.LDY(0x0001);
 
@@ -1244,11 +1244,11 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Memory" ) {
-      nes.bus.write(0x0001, 0x34);
+      nes.cpu_bus.write(0x0001, 0x34);
 
       nes.cpu.LSR(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x1A );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x1A );
       REQUIRE( (nes.cpu.flag & 0x01) == 0x00 );  // Carry flag
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
@@ -1281,7 +1281,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.PHA({});
 
-    REQUIRE( nes.bus.read(0x0134) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x0134) == 0x12 );
     REQUIRE( nes.cpu.stack_pointer == 0x33 );
     REQUIRE( nes.cpu.lockout_counter == 2 );
   }
@@ -1292,7 +1292,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.PHP({});
 
-    REQUIRE( nes.bus.read(0x0134) == 0xB6 );
+    REQUIRE( nes.cpu_bus.read(0x0134) == 0xB6 );
     REQUIRE( nes.cpu.stack_pointer == 0x33 );
     REQUIRE( nes.cpu.lockout_counter == 2 );
   }
@@ -1301,7 +1301,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     SECTION( "Base" ) {
       nes.cpu.accumulator = 0x00;
       nes.cpu.stack_pointer = 0x12;
-      nes.bus.write(0x0113, 0x34);
+      nes.cpu_bus.write(0x0113, 0x34);
 
       nes.cpu.PLA({});
 
@@ -1315,7 +1315,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     SECTION( "Zero flag" ) {
       nes.cpu.accumulator = 0x34;
       nes.cpu.stack_pointer = 0x12;
-      nes.bus.write(0x0113, 0x00);
+      nes.cpu_bus.write(0x0113, 0x00);
 
       nes.cpu.PLA({});
 
@@ -1329,7 +1329,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     SECTION( "Negative flag" ) {
       nes.cpu.accumulator = 0x00;
       nes.cpu.stack_pointer = 0x12;
-      nes.bus.write(0x0113, 0xCD);
+      nes.cpu_bus.write(0x0113, 0xCD);
 
       nes.cpu.PLA({});
 
@@ -1344,7 +1344,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
   SECTION( "PLP" ) {
     nes.cpu.flag = 0xC3;
     nes.cpu.stack_pointer = 0x12;
-    nes.bus.write(0x0113, 0x75);
+    nes.cpu_bus.write(0x0113, 0x75);
 
     nes.cpu.PLP({});
 
@@ -1408,11 +1408,11 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     SECTION( "Memory" ) {
       nes.cpu.flag &= ~0x01;
-      nes.bus.write(0x0001, 0x42);
+      nes.cpu_bus.write(0x0001, 0x42);
 
       nes.cpu.ROL(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x84 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x84 );
       REQUIRE( (nes.cpu.flag & 0x01) == 0x00 );  // Carry flag
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x80 );  // Negative flag
@@ -1475,11 +1475,11 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     SECTION( "Memory" ) {
       nes.cpu.flag &= ~0x01;
-      nes.bus.write(0x0001, 0x42);
+      nes.cpu_bus.write(0x0001, 0x42);
 
       nes.cpu.ROR(0x0001);
 
-      REQUIRE( nes.bus.read(0x0001) == 0x21 );
+      REQUIRE( nes.cpu_bus.read(0x0001) == 0x21 );
       REQUIRE( (nes.cpu.flag & 0x01) == 0x00 );  // Carry flag
       REQUIRE( (nes.cpu.flag & 0x02) == 0x00 );  // Zero flag
       REQUIRE( (nes.cpu.flag & 0x80) == 0x00 );  // Negative flag
@@ -1491,9 +1491,9 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     nes.cpu.program_counter = 0x4321;
     nes.cpu.stack_pointer = 0x56;
     nes.cpu.flag = 0x10;
-    nes.bus.write(0x0157, 0xB6);
-    nes.bus.write(0x0158, 0x34);
-    nes.bus.write(0x0159, 0x12);
+    nes.cpu_bus.write(0x0157, 0xB6);
+    nes.cpu_bus.write(0x0158, 0x34);
+    nes.cpu_bus.write(0x0159, 0x12);
 
     nes.cpu.RTI({});
 
@@ -1506,8 +1506,8 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
   SECTION( "RTS" ) {
     nes.cpu.program_counter = 0x4321;
     nes.cpu.stack_pointer = 0x56;
-    nes.bus.write(0x0157, 0x34);
-    nes.bus.write(0x0158, 0x12);
+    nes.cpu_bus.write(0x0157, 0x34);
+    nes.cpu_bus.write(0x0158, 0x12);
 
     nes.cpu.RTS({});
 
@@ -1518,7 +1518,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
   SECTION( "SBC" ) {
     SECTION( "Base" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
       nes.cpu.flag |= 0x01;
 
@@ -1532,7 +1532,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
       REQUIRE( nes.cpu.lockout_counter == 1 );
     }
     SECTION( "Base + carry" ) {
-      nes.bus.write(0x0001, 0x12);
+      nes.cpu_bus.write(0x0001, 0x12);
       nes.cpu.accumulator = 0x34;
       nes.cpu.flag &= ~0x01;
 
@@ -1547,7 +1547,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Carry flag" ) {
-      nes.bus.write(0x0001, 0x20);
+      nes.cpu_bus.write(0x0001, 0x20);
       nes.cpu.accumulator = 0x50;
       nes.cpu.flag |= 0x01;
 
@@ -1562,7 +1562,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Zero flag" ) {
-      nes.bus.write(0x0001, 0x11);
+      nes.cpu_bus.write(0x0001, 0x11);
       nes.cpu.accumulator = 0x12;
       nes.cpu.flag &= ~0x01;
 
@@ -1577,7 +1577,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Overflow flag" ) {
-      nes.bus.write(0x0001, 0x01);
+      nes.cpu_bus.write(0x0001, 0x01);
       nes.cpu.accumulator = 0x80;
       nes.cpu.flag |= 0x01;
 
@@ -1592,7 +1592,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
     }
 
     SECTION( "Negative flag" ) {
-      nes.bus.write(0x0001, 0xD6);
+      nes.cpu_bus.write(0x0001, 0xD6);
       nes.cpu.accumulator = 0xBB;
       nes.cpu.flag |= 0x01;
 
@@ -1648,7 +1648,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.STA(0x1234);
 
-    REQUIRE( nes.bus.read(0x1234) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x1234) == 0x12 );
     REQUIRE( nes.cpu.lockout_counter == 1 );
   }
 
@@ -1657,7 +1657,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.STX(0x1234);
 
-    REQUIRE( nes.bus.read(0x1234) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x1234) == 0x12 );
     REQUIRE( nes.cpu.lockout_counter == 1 );
   }
 
@@ -1666,7 +1666,7 @@ TEST_CASE( "CPU operations", "[CPU]" ) {
 
     nes.cpu.STY(0x1234);
 
-    REQUIRE( nes.bus.read(0x1234) == 0x12 );
+    REQUIRE( nes.cpu_bus.read(0x1234) == 0x12 );
     REQUIRE( nes.cpu.lockout_counter == 1 );
   }
 

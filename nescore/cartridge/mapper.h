@@ -8,8 +8,8 @@
 class Mapper : public MemoryDevice {
 private:
 public:
-  virtual std::optional<uint8_t> read(uint16_t address) = 0;
-  virtual void write(uint16_t address, uint8_t data) = 0;
+  virtual std::optional<uint8_t> read(uint16_t address, uint8_t source) = 0;
+  virtual void write(uint16_t address, uint8_t data, uint8_t source) = 0;
 };
 
 #endif  // MAPPER_H

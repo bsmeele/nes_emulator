@@ -5,8 +5,8 @@
 TEST_CASE( "CPU address modes", "[CPU]" ) {
   NES nes = NES();
 
-  nes.bus.write(0x0001, 0x34);
-  nes.bus.write(0x0002, 0x12);
+  nes.cpu_bus.write(0x0001, 0x34);
+  nes.cpu_bus.write(0x0002, 0x12);
 
   nes.cpu.program_counter = 0x0001;
 
@@ -88,8 +88,8 @@ TEST_CASE( "CPU address modes", "[CPU]" ) {
   }
 
   SECTION( "Indirect" ) {
-    nes.bus.write(0x1234, 0x23);
-    nes.bus.write(0x1235, 0x01);
+    nes.cpu_bus.write(0x1234, 0x23);
+    nes.cpu_bus.write(0x1235, 0x01);
 
     auto address = nes.cpu.addressing_indirect();
 
@@ -102,8 +102,8 @@ TEST_CASE( "CPU address modes", "[CPU]" ) {
     SECTION( "No page crossing" ) {
       nes.cpu.x_index = 0x65;
 
-      nes.bus.write(0x0099, 0x23);
-      nes.bus.write(0x009A, 0x01);
+      nes.cpu_bus.write(0x0099, 0x23);
+      nes.cpu_bus.write(0x009A, 0x01);
 
       auto address = nes.cpu.addressing_indirectX();
 
@@ -115,8 +115,8 @@ TEST_CASE( "CPU address modes", "[CPU]" ) {
     SECTION( "No page crossing (overflow)" ) {
       nes.cpu.x_index = 0xDE;
 
-      nes.bus.write(0x0012, 0x23);
-      nes.bus.write(0x0013, 0x01);
+      nes.cpu_bus.write(0x0012, 0x23);
+      nes.cpu_bus.write(0x0013, 0x01);
 
       auto address = nes.cpu.addressing_indirectX();
 
@@ -130,8 +130,8 @@ TEST_CASE( "CPU address modes", "[CPU]" ) {
     SECTION( "No page crossing" ) {
       nes.cpu.y_index = 0x65;
 
-      nes.bus.write(0x0034, 0x23);
-      nes.bus.write(0x0035, 0x01);
+      nes.cpu_bus.write(0x0034, 0x23);
+      nes.cpu_bus.write(0x0035, 0x01);
 
       auto address = nes.cpu.addressing_indirectY();
 
@@ -143,8 +143,8 @@ TEST_CASE( "CPU address modes", "[CPU]" ) {
     SECTION( "Page crossing" ) {
       nes.cpu.y_index = 0xEF;
 
-      nes.bus.write(0x0034, 0x23);
-      nes.bus.write(0x0035, 0x01);
+      nes.cpu_bus.write(0x0034, 0x23);
+      nes.cpu_bus.write(0x0035, 0x01);
 
       auto address = nes.cpu.addressing_indirectY();
 

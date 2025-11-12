@@ -1,6 +1,7 @@
 #include "bus.h"
 
-Bus::Bus() {
+Bus::Bus(uint8_t source) {
+  this->source = source;
   this->open_bus = 0x00;  // Not sure what the power-on behaviour of the open bus would be. Possibly it's random, similar to RAM
 }
 
@@ -13,7 +14,7 @@ void Bus::mount(MemoryDevice* device) {
 uint8_t Bus::read(uint16_t address) {
   for (auto device : devices) {
     // TODO: Bus conflict
-    std::optional<uint8_t> data = device->read(address);
+    std::optional<uint8_t> data = device->read(address, this->source);
     if (data) { return *data; }
   }
   
@@ -23,6 +24,6 @@ uint8_t Bus::read(uint16_t address) {
 void Bus::write(uint16_t address, uint8_t data) {
 
   for (auto device : devices) {
-    device->write(address, data);
+    device->write(address, data, this->source);
   }
 }

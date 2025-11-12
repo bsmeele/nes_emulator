@@ -29,20 +29,20 @@ int main() {
 #ifdef TESTING
   std::cout << "Reading the first 4 bytes from bank1 of the cartridge" << std::endl;
   std::cout << std::hex << std::uppercase
-    << static_cast<int>(nes.bus.read(0x8000))
-    << " " << static_cast<int>(nes.bus.read(0x8001))
-    << " " << static_cast<int>(nes.bus.read(0x8002))
-    << " " << static_cast<int>(nes.bus.read(0x8003))
-    << " " << static_cast<int>(nes.bus.read(0x8004))
+    << static_cast<int>(nes.cpu_bus.read(0x8000))
+    << " " << static_cast<int>(nes.cpu_bus.read(0x8001))
+    << " " << static_cast<int>(nes.cpu_bus.read(0x8002))
+    << " " << static_cast<int>(nes.cpu_bus.read(0x8003))
+    << " " << static_cast<int>(nes.cpu_bus.read(0x8004))
     << std::dec << std::endl;
 
   std::cout << "Reading the first 4 bytes from bank2 of the cartridge" << std::endl;
   std::cout << std::hex << std::uppercase
-    << static_cast<int>(nes.bus.read(0xC000))
-    << " " << static_cast<int>(nes.bus.read(0xC001))
-    << " " << static_cast<int>(nes.bus.read(0xC002))
-    << " " << static_cast<int>(nes.bus.read(0xC003))
-    << " " << static_cast<int>(nes.bus.read(0xC004))
+    << static_cast<int>(nes.cpu_bus.read(0xC000))
+    << " " << static_cast<int>(nes.cpu_bus.read(0xC001))
+    << " " << static_cast<int>(nes.cpu_bus.read(0xC002))
+    << " " << static_cast<int>(nes.cpu_bus.read(0xC003))
+    << " " << static_cast<int>(nes.cpu_bus.read(0xC004))
     << std::dec << std::endl;
 #endif
 
